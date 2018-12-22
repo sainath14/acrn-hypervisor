@@ -486,20 +486,6 @@ static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8
 	return dmar_unit;
 }
 
-static void dmar_write_buffer_flush(struct dmar_drhd_rt *dmar_unit)
-{
-	uint32_t status;
-
-	if (iommu_cap_rwbf(dmar_unit->cap) != 0U) {
-		spinlock_obtain(&(dmar_unit->lock));
-		iommu_write32(dmar_unit, DMAR_GCMD_REG, dmar_unit->gcmd | DMA_GCMD_WBF);
-
-		/* read lower 32 bits to check */
-		dmar_wait_completion(dmar_unit, DMAR_GSTS_REG, DMA_GSTS_WBFS, true, &status);
-		spinlock_release(&(dmar_unit->lock));
-	}
-}
-
 /*
  * did: domain id
  * sid: source id
@@ -799,7 +785,6 @@ static void dmar_prepare(struct dmar_drhd_rt *dmar_unit)
 static void dmar_enable(struct dmar_drhd_rt *dmar_unit)
 {
 	dev_dbg(ACRN_DBG_IOMMU, "enable dmar uint [0x%x]", dmar_unit->drhd->reg_base_addr);
-	dmar_write_buffer_flush(dmar_unit);
 	dmar_invalid_context_cache_global(dmar_unit);
 	dmar_invalid_iotlb_global(dmar_unit);
 	dmar_enable_translation(dmar_unit);
@@ -815,8 +800,6 @@ static void dmar_suspend(struct dmar_drhd_rt *dmar_unit)
 {
 	uint32_t i;
 
-	/* flush */
-	dmar_write_buffer_flush(dmar_unit);
 	dmar_invalid_context_cache_global(dmar_unit);
 	dmar_invalid_iotlb_global(dmar_unit);
 
@@ -1051,6 +1034,10 @@ struct iommu_domain *create_iommu_domain(uint16_t vm_id, uint64_t translation_ta
 		domain->addr_width = addr_width;
 		domain->is_tt_ept = true;
 
+		if (!iommu_page_walk_coherent) {
+			cache_flush_invalidate_all();
+		}
+
 		dev_dbg(ACRN_DBG_IOMMU, "create domain [%d]: vm_id = %hu, ept@0x%x",
 			vmid_to_domainid(domain->vm_id), domain->vm_id, domain->trans_table_ptr);
 	}
@@ -1105,9 +1092,6 @@ int32_t unassign_iommu_device(const struct iommu_domain *domain, uint8_t bus, ui
 
 void enable_iommu(void)
 {
-	if (!iommu_page_walk_coherent) {
-		cache_flush_invalidate_all();
-	}
 	do_action_for_iommus(dmar_enable);
 }
 

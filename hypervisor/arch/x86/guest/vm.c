@@ -130,8 +130,6 @@ int32_t create_vm(struct vm_description *vm_desc, struct acrn_vm **rtn_vm)
 		}
 
 		if (status == 0) {
-			enable_iommu();
-
 			INIT_LIST_HEAD(&vm->softirq_dev_entry_list);
 			spinlock_init(&vm->softirq_dev_lock);
 			vm->intr_inject_delay_delta = 0UL;
