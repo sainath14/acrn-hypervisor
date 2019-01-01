@@ -931,8 +931,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 				(void)strncpy_s(type, 16U, "PIC", 16U);
 			}
 			ioapic_get_rte(phys_irq, &rte);
-			*dest = rte.full >> IOAPIC_RTE_DEST_SHIFT;
-			if ((rte.full & IOAPIC_RTE_TRGRLVL) != 0UL) {
+			*dest = rte.bits.dest_field;
+			if (rte.bits.trigger_mode == IOAPIC_RTE_TRGRLVL) {
 				*lvl_tm = true;
 			} else {
 				*lvl_tm = false;
@@ -1051,13 +1051,13 @@ static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
 	rte.full = 0UL;
 	for (pin = 0U; pin < pincount; pin++) {
 		vioapic_get_rte(vm, pin, &rte);
-		mask = ((rte.full & IOAPIC_RTE_INTMASK) == IOAPIC_RTE_INTMSET);
-		remote_irr = ((rte.full & IOAPIC_RTE_REM_IRR) == IOAPIC_RTE_REM_IRR);
-		phys = ((rte.full & IOAPIC_RTE_DESTMOD) == IOAPIC_RTE_DESTPHY);
-		delmode = (uint32_t)(rte.full & IOAPIC_RTE_DELMOD);
-		level = ((rte.full & IOAPIC_RTE_TRGRLVL) != 0UL);
-		vector = rte.u.lo_32 & IOAPIC_RTE_LOW_INTVEC;
-		dest = (uint32_t)(rte.full >> IOAPIC_RTE_DEST_SHIFT);
+		mask = (rte.bits.intr_mask == IOAPIC_RTE_INTMSET);
+		remote_irr = (rte.bits.remote_irr == IOAPIC_RTE_REM_IRR);
+		phys = (rte.bits.dest_mode == IOAPIC_RTE_DESTPHY);
+		delmode = rte.bits.delivery_mode;
+		level = (rte.bits.trigger_mode == IOAPIC_RTE_TRGRLVL);
+		vector = rte.bits.vector;
+		dest = rte.bits.dest_field;
 
 		len = snprintf(str, size, "\r\n%hhu\t0x%X\t%s\t0x%X\t%s\t%u\t%d\t%d",
 				pin, vector, phys ? "phys" : "logic", dest, level ? "level" : "edge",
@@ -1099,13 +1099,13 @@ static int32_t shell_show_vioapic_info(int32_t argc, char **argv)
 static void get_rte_info(union ioapic_rte rte, bool *mask, bool *irr,
 	bool *phys, uint32_t *delmode, bool *level, uint32_t *vector, uint32_t *dest)
 {
-	*mask = ((rte.full & IOAPIC_RTE_INTMASK) == IOAPIC_RTE_INTMSET);
-	*irr = ((rte.full & IOAPIC_RTE_REM_IRR) == IOAPIC_RTE_REM_IRR);
-	*phys = ((rte.full & IOAPIC_RTE_DESTMOD) == IOAPIC_RTE_DESTPHY);
-	*delmode = (uint32_t)(rte.full & IOAPIC_RTE_DELMOD);
-	*level = ((rte.full & IOAPIC_RTE_TRGRLVL) != 0UL);
-	*vector = (uint32_t)(rte.full & IOAPIC_RTE_INTVEC);
-	*dest = (uint32_t)(rte.full >> APIC_ID_SHIFT);
+	*mask = (rte.bits.intr_mask == IOAPIC_RTE_INTMSET);
+	*irr = (rte.bits.remote_irr == IOAPIC_RTE_REM_IRR);
+	*phys = (rte.bits.dest_mode == IOAPIC_RTE_DESTPHY);
+	*delmode = rte.bits.delivery_mode;
+	*level = (rte.bits.trigger_mode == IOAPIC_RTE_TRGRLVL);
+	*vector = rte.bits.vector;
+	*dest = rte.bits.dest_field;
 }
 
 /**
