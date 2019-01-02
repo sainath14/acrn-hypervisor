@@ -352,6 +352,13 @@ config IOMMU_BUS_NUM
 	  Any BDF with a bus ID smaller than this number is mapped to
 	  the IOMMU domain of the first VM.
 
+config IR_ENTRIES
+	hex "Maximum number of IR entries per IOMMU IR"
+	range 1 256
+	default 1
+	help
+	  Multiples of 256, a value of 1 indicates 256 entries per IOMMU IR table.
+
 config MAX_PCI_DEV_NUM
 	int "Maximum number of PCI devices"
 	range 1 1024
