@@ -23,6 +23,14 @@ union source_id (name) = {.msi_id = {.bdf = (a), .entry_nr = (b)} }
 #define DEFINE_IOAPIC_SID(name, a, b)	\
 union source_id (name) = {.intx_id = {.pin = (a), .src = (b)} }
 
+union irte_index {
+	uint16_t index;
+	struct {
+		uint16_t index_1:15;
+		uint16_t index_2:1;
+	} bits;
+};
+
 union source_id {
 	uint64_t value;
 	struct {
@@ -36,12 +44,47 @@ union source_id {
 	} intx_id;
 };
 
+
+union msi_addr {
+	uint64_t full;
+	struct {
+		uint32_t rsvd_1:2;
+		uint32_t dest_mode:1;
+		uint32_t rh:1;
+		uint32_t rsvd_2:8;
+		uint32_t dest_field:8;
+		uint32_t constant:12;
+		uint32_t hi_32;
+	} bits;
+	struct {
+		uint32_t rsvd_1:2;
+		uint32_t intr_index_1:1;
+		uint32_t shv:1;
+		uint32_t intr_format:1;
+		uint32_t intr_index_2:15;
+		uint32_t constant:12;
+		uint32_t hi_32;	
+	} ir_bits;
+};
+
+union msi_data {
+	uint32_t full;
+	struct {
+		uint32_t vector:8;
+		uint32_t delivery_mode:3;
+		uint32_t rsvd_1:3;
+		uint32_t level:1;
+		uint32_t trigger_mode:1;
+		uint32_t rsvd_2:16;
+	} bits;
+};
+
 /* entry per guest virt vector */
 struct ptirq_msi_info {
-	uint64_t vmsi_addr; /* virt msi_addr */
-	uint32_t vmsi_data; /* virt msi_data */
-	uint64_t pmsi_addr; /* phys msi_addr */
-	uint32_t pmsi_data; /* phys msi_data */
+	union msi_addr vmsi_addr; /* virt msi_addr */
+	union msi_data vmsi_data; /* virt msi_data */
+	union msi_addr pmsi_addr; /* phys msi_addr */
+	union msi_data pmsi_data; /* phys msi_data */
 	int32_t is_msix;	/* 0-MSI, 1-MSIX */
 };
 

@@ -40,6 +40,7 @@
 #define RSDP_CHECKSUM_LENGTH       20
 #define ACPI_NAME_SIZE             4U
 #define ACPI_MADT_TYPE_LOCAL_APIC  0U
+#define ACPI_MADT_TYPE_IOAPIC  1U
 #define ACPI_MADT_ENABLED          1U
 #define ACPI_OEM_TABLE_ID_SIZE     8
 
@@ -98,6 +99,15 @@ struct acpi_madt_local_apic {
 	/* Processor's local APIC id */
 	uint8_t                        id;
 	uint32_t                       lapic_flags;
+};
+
+struct acpi_madt_ioapic {
+	struct acpi_subtable_header    header;
+	/* IOAPIC id */
+	uint8_t				id;
+	uint8_t				rsvd;
+	uint32_t			addr;
+	uint32_t			gsi_base;
 };
 
 static void *global_rsdp;
@@ -248,6 +258,40 @@ local_parse_madt(void *madt, uint32_t lapic_id_array[CONFIG_MAX_PCPU_NUM])
 	return pcpu_num;
 }
 
+static uint16_t
+ioapic_parse_madt(void *madt, struct ioapic_info ioapic_id_array[CONFIG_MAX_IOAPIC_NUM])
+{
+	struct acpi_madt_ioapic *ioapic;
+	struct acpi_table_madt *madt_ptr;
+	void *first, *end, *iterator;
+	struct acpi_subtable_header *entry;
+	uint16_t ioapic_num = 0U;
+
+	madt_ptr = (struct acpi_table_madt *)madt;
+
+	first = madt_ptr + 1;
+	end = (char *)madt_ptr + madt_ptr->header.length;
+
+	for (iterator = first; (iterator) < (end); iterator += entry->length) {
+		entry = (struct acpi_subtable_header *)iterator;
+		if (entry->length < sizeof(struct acpi_subtable_header)) {
+			break;
+		}
+
+		if (entry->type == ACPI_MADT_TYPE_IOAPIC) {
+			ioapic = (struct acpi_madt_ioapic *)iterator;
+			if (ioapic_num < CONFIG_MAX_IOAPIC_NUM) {
+				ioapic_id_array[ioapic_num].id = ioapic->id;
+				ioapic_id_array[ioapic_num].addr = ioapic->addr;
+				ioapic_id_array[ioapic_num].gsi_base = ioapic->gsi_base;
+			}
+			ioapic_num++;
+		}
+	}
+
+	return ioapic_num;
+}
+
 /* The lapic_id info gotten from madt will be returned in lapic_id_array */
 uint16_t parse_madt(uint32_t lapic_id_array[CONFIG_MAX_PCPU_NUM])
 {
@@ -260,6 +304,19 @@ uint16_t parse_madt(uint32_t lapic_id_array[CONFIG_MAX_PCPU_NUM])
 	ASSERT(madt != NULL, "fail to get madt");
 
 	return local_parse_madt(madt, lapic_id_array);
+}
+
+uint16_t parse_madt_ioapic(struct ioapic_info ioapic_id_array[CONFIG_MAX_IOAPIC_NUM])
+{
+	void *madt;
+
+	global_rsdp = get_rsdp();
+	ASSERT(global_rsdp != NULL, "fail to get rsdp");
+
+	madt = get_acpi_tbl(ACPI_SIG_MADT);
+	ASSERT(madt != NULL, "fail to get madt");
+
+	return ioapic_parse_madt(madt, ioapic_id_array);
 }
 
 void *get_dmar_table(void)
