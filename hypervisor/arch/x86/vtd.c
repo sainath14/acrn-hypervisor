@@ -76,6 +76,7 @@ static inline uint64_t dmar_set_bitslice(uint64_t var, uint64_t mask, uint32_t p
 #define DMAR_INV_STATUS_WRITE_SHIFT	5U
 #define DMAR_INV_CONTEXT_CACHE_DESC	0x01UL
 #define DMAR_INV_IOTLB_DESC		0x02UL
+#define DMAR_INV_IEC_DESC		0x04UL
 #define DMAR_INV_WAIT_DESC		0x05UL
 #define DMAR_INV_STATUS_WRITE		(1UL << DMAR_INV_STATUS_WRITE_SHIFT)
 #define DMAR_INV_STATUS_INCOMPLETE	0UL
@@ -86,6 +87,9 @@ static inline uint64_t dmar_set_bitslice(uint64_t var, uint64_t mask, uint32_t p
 
 #define DMAR_IR_ENABLE_EIM_SHIFT	11UL
 #define DMAR_IR_ENABLE_EIM		(1UL << DMAR_IR_ENABLE_EIM_SHIFT)
+
+#define DMAR_IECI_INDEXED              1U
+#define DMAR_IEC_GLOBAL_INVL           0U
 
 enum dmar_cirg_type {
 	DMAR_CIRG_RESERVED = 0,
@@ -503,6 +507,39 @@ static int32_t dmar_register_hrhd(struct dmar_drhd_rt *dmar_unit)
 	return ret;
 }
 
+static struct dmar_drhd_rt *ioapic_to_dmaru(uint16_t ioapic_id, struct bdf *sid)
+{
+	struct dmar_info *info = get_dmar_info();
+	struct dmar_drhd_rt *dmar_unit = NULL;
+	uint32_t i, j;
+	bool found = false;
+
+	if (info == NULL) {
+		pr_fatal("%s: can't find dmar info\n", __func__);
+	} else {
+		for (j = 0U; j < info->drhd_count; j++) {
+			dmar_unit = &dmar_drhd_units[j];
+			for (i = 0U; i < dmar_unit->drhd->dev_cnt; i++) {
+				if ((dmar_unit->drhd->devices[i].type == ACPI_DMAR_SCOPE_TYPE_IOAPIC) &&
+						(dmar_unit->drhd->devices[i].id == ioapic_id)) {
+					sid->bus = dmar_unit->drhd->devices[i].bus;
+					sid->devfn = dmar_unit->drhd->devices[i].devfun;
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				break;
+			}
+		}
+
+		if (j == info->drhd_count) {
+			dmar_unit = NULL;
+		}
+	}
+
+	return dmar_unit;
+}
 static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8_t devfun)
 {
 	struct dmar_info *info = get_dmar_info();
@@ -693,6 +730,34 @@ static void dmar_set_intr_remap_table(struct dmar_drhd_rt *dmar_unit)
 	dmar_wait_completion(dmar_unit, DMAR_GSTS_REG, DMA_GSTS_IRTPS, false, &status);
 
 	spinlock_release(&(dmar_unit->lock));
+}
+
+static void dmar_invalid_iec(struct dmar_drhd_rt *dmar_unit, uint16_t intr_index,
+				uint8_t index_mask, bool is_global)
+{
+	struct dmar_qi_desc invalidate_desc;
+
+	invalidate_desc.upper = 0UL;
+	invalidate_desc.lower = DMAR_INV_IEC_DESC;
+
+	if (is_global) {
+		invalidate_desc.lower |= DMAR_IEC_GLOBAL_INVL;
+	} else {
+		invalidate_desc.lower |= DMAR_IECI_INDEXED | dma_iec_index(intr_index, index_mask);
+	}
+
+	if (invalidate_desc.lower != 0UL) {
+		spinlock_obtain(&(dmar_unit->lock));
+
+		dmar_issue_qi_request(dmar_unit, invalidate_desc);
+
+		spinlock_release(&(dmar_unit->lock));
+	}
+}
+
+static void dmar_invalid_iec_global(struct dmar_drhd_rt *dmar_unit)
+{
+	dmar_invalid_iec(dmar_unit, 0U, 0U, true);
 }
 
 static void dmar_set_root_table(struct dmar_drhd_rt *dmar_unit)
@@ -1279,4 +1344,87 @@ void init_iommu_sos_vm_domain(struct acrn_vm *sos_vm)
 			}
 		}
 	}
+}
+
+int dmar_assign_irte(struct intr_source intr_src, union dmar_ir_entry irte, uint16_t index)
+{
+	struct dmar_drhd_rt *dmar_unit;
+	union dmar_ir_entry *ir_table, *ir_entry;
+	int ret;
+	struct bdf sid;
+	uint8_t bus, devfn;
+	uint64_t trigger_mode;
+
+	if (intr_src.is_msi) {
+		dmar_unit = device_to_dmaru(0U, intr_src.src.msi.bus, intr_src.src.msi.devfn);
+		bus = intr_src.src.msi.bus;
+		devfn = intr_src.src.msi.devfn;
+		trigger_mode = 0x0UL;
+	} else {
+		dmar_unit = ioapic_to_dmaru(intr_src.src.ioapic_id, &sid);
+		bus = sid.bus;
+		devfn = sid.devfn;
+		trigger_mode = irte.bits.trigger_mode;
+	}
+
+	if (dmar_unit == NULL) {
+		pr_err("no dmar unit found for device: %x:%x.%x", bus, pci_slot(devfn), pci_func(devfn));
+		ret = -EINVAL;
+	} else if (dmar_unit->drhd->ignore) {
+		dev_dbg(ACRN_DBG_IOMMU, "device is ignored :0x%x:%x.%x", bus, pci_slot(devfn), pci_func(devfn));
+		ret = -EINVAL;
+	} else if (dmar_unit->ir_table_addr == 0UL) {
+		pr_err("IR table is not set for dmar unit");
+		ret = -EINVAL;
+	} else {
+		irte.bits.svt = 0x1UL;
+		irte.bits.sq = 0x0UL;
+		irte.bits.sid = (uint16_t)(bus << 0x8U) | (uint16_t)devfn;
+		irte.bits.present = 0x1UL;
+		irte.bits.mode = 0x0UL;
+		irte.bits.trigger_mode = trigger_mode;
+		irte.bits.fpd = 0x0UL;
+		ir_table = (union dmar_ir_entry *)hpa2hva(dmar_unit->ir_table_addr);
+		ir_entry = ir_table + index;
+		ir_entry->entry.upper = irte.entry.upper;
+		ir_entry->entry.lower = irte.entry.lower;
+
+		iommu_flush_cache(dmar_unit, ir_entry, sizeof(union dmar_ir_entry));
+		dmar_invalid_iec_global(dmar_unit);
+	}
+	return ret;
+}
+
+int dmar_free_irte(struct intr_source intr_src, uint16_t index)
+{
+	struct dmar_drhd_rt *dmar_unit;
+	union dmar_ir_entry *ir_table, *ir_entry;
+	int ret;
+	struct bdf sid;
+
+	if (intr_src.is_msi) {
+		dmar_unit = device_to_dmaru(0U, intr_src.src.msi.bus, intr_src.src.msi.devfn);
+	} else {
+		dmar_unit = ioapic_to_dmaru(intr_src.src.ioapic_id, &sid);
+	}
+
+	if (dmar_unit == NULL) {
+		pr_err("no dmar unit found for device: %x:%x.%x", intr_src.src.msi.bus,
+							pci_slot(intr_src.src.msi.devfn), pci_func(intr_src.src.msi.devfn));
+		ret = -EINVAL;
+	} else if (dmar_unit->drhd->ignore) {
+		dev_dbg(ACRN_DBG_IOMMU, "device is ignored :0x%x:%x.%x", intr_src.src.msi.bus,
+							pci_slot(intr_src.src.msi.devfn), pci_func(intr_src.src.msi.devfn));
+	} else if (dmar_unit->ir_table_addr == 0UL) {
+		pr_err("IR table is not set for dmar unit");
+		ret = -EINVAL;
+	} else {
+		ir_table = (union dmar_ir_entry *)hpa2hva(dmar_unit->ir_table_addr);
+		ir_entry = ir_table + index;
+		ir_entry->bits.present = 0x0UL;
+
+		iommu_flush_cache(dmar_unit, ir_entry, sizeof(union dmar_ir_entry));
+		dmar_invalid_iec_global(dmar_unit);
+	}
+	return ret;
 }

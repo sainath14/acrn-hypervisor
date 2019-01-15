@@ -23,6 +23,29 @@ union source_id (name) = {.msi_id = {.bdf = (a), .entry_nr = (b)} }
 #define DEFINE_IOAPIC_SID(name, a, b)	\
 union source_id (name) = {.intx_id = {.pin = (a), .src = (b)} }
 
+struct bdf {
+	uint8_t bus;
+	uint8_t devfn;
+};
+
+union source {
+	uint16_t ioapic_id;
+	struct bdf msi;
+};
+
+struct intr_source {
+	bool is_msi;
+	union source src;
+};
+
+union irte_index {
+	uint16_t index;
+	struct {
+		uint16_t index_low:15;
+		uint16_t index_high:1;
+	} bits __packed;
+};
+
 union source_id {
 	uint64_t value;
 	struct {
@@ -36,6 +59,7 @@ union source_id {
 	} intx_id;
 };
 
+
 union msi_addr {
 	uint64_t full;
 	struct {
@@ -47,6 +71,15 @@ union msi_addr {
 		uint32_t constant:12;
 		uint32_t hi_32;
 	} bits __packed;
+	struct {
+		uint32_t rsvd_1:2;
+		uint32_t intr_index_high:1;
+		uint32_t shv:1;
+		uint32_t intr_format:1;
+		uint32_t intr_index_low:15;
+		uint32_t constant:12;
+		uint32_t hi_32;	
+	} ir_bits __packed;
 };
 
 union msi_data {
