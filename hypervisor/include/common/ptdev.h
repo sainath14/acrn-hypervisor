@@ -36,12 +36,37 @@ union source_id {
 	} intx_id;
 };
 
+union msi_addr_reg {
+	uint64_t full;
+	struct {
+		uint32_t rsvd_1:2;
+		uint32_t dest_mode:1;
+		uint32_t rh:1;
+		uint32_t rsvd_2:8;
+		uint32_t dest_field:8;
+		uint32_t constant:12;
+		uint32_t hi_32;
+	} bits __packed;
+};
+
+union msi_data_reg {
+	uint32_t full;
+	struct {
+		uint32_t vector:8;
+		uint32_t delivery_mode:3;
+		uint32_t rsvd_1:3;
+		uint32_t level:1;
+		uint32_t trigger_mode:1;
+		uint32_t rsvd_2:16;
+	} bits __packed;
+};
+
 /* entry per guest virt vector */
 struct ptirq_msi_info {
-	uint64_t vmsi_addr; /* virt msi_addr */
-	uint32_t vmsi_data; /* virt msi_data */
-	uint64_t pmsi_addr; /* phys msi_addr */
-	uint32_t pmsi_data; /* phys msi_data */
+	union msi_addr_reg vmsi_addr; /* virt msi_addr */
+	union msi_data_reg vmsi_data; /* virt msi_data */
+	union msi_addr_reg pmsi_addr; /* phys msi_addr */
+	union msi_data_reg pmsi_data; /* phys msi_data */
 	int32_t is_msix;	/* 0-MSI, 1-MSIX */
 };
 
