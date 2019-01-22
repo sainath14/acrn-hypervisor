@@ -173,6 +173,31 @@ union ioapic_rte {
 		uint32_t lo_32;
 		uint32_t hi_32;
 	} u;
+	struct {
+		uint64_t vector:8;
+		uint64_t delivery_mode:3;
+		uint64_t dest_mode:1;
+		uint64_t delivery_status:1;
+		uint64_t intr_polarity:1;
+		uint64_t remote_irr:1;
+		uint64_t trigger_mode:1;
+		uint64_t intr_mask:1;
+		uint64_t rsvd_1:39;
+		uint64_t dest_field:8;
+	} bits __packed;
+	struct {
+		uint32_t vector:8;
+		uint32_t constant:3;
+		uint32_t intr_index_high:1;
+		uint32_t intr_polarity:1;
+		uint32_t remote_irr:1;
+		uint32_t trigger_mode:1;
+		uint32_t intr_mask:1;
+		uint32_t rsvd_1:15;
+		uint32_t rsvd_2:16;
+		uint32_t intr_format:1;
+		uint32_t intr_index_low:15;
+	} ir_bits __packed;
 };
 
 /******************************************************************************
@@ -393,42 +418,29 @@ union ioapic_rte {
 /*
  * fields in the IO APIC's redirection table entries
  */
-#define IOAPIC_RTE_DEST_SHIFT  	56U
-/* broadcast addr: all APICs */
-#define IOAPIC_RTE_DEST_MASK	0xff00000000000000UL
+#define IOAPIC_RTE_INTMCLR	0x0U	/*       clear, allow INTs */
+#define IOAPIC_RTE_INTMSET	0x1U	/*       set, inhibit INTs */
 
-#define IOAPIC_RTE_RESV	0x00fe0000UL	/* reserved */
+#define IOAPIC_RTE_TRGREDG	0x0U	/*       edge */
+#define IOAPIC_RTE_TRGRLVL	0x1U	/*       level */
 
-#define IOAPIC_RTE_INTMASK	0x00010000UL	/* R/W: INTerrupt mask */
-#define IOAPIC_RTE_INTMCLR	0x00000000UL	/*       clear, allow INTs */
-#define IOAPIC_RTE_INTMSET	0x00010000UL	/*       set, inhibit INTs */
+#define IOAPIC_RTE_REM_IRR	0x1U	/* RO: remote IRR */
 
-#define IOAPIC_RTE_TRGRMOD	0x00008000UL	/* R/W: trigger mode */
-#define IOAPIC_RTE_TRGREDG	0x00000000UL	/*       edge */
-#define IOAPIC_RTE_TRGRLVL	0x00008000UL	/*       level */
+#define IOAPIC_RTE_INTAHI	0x0U	/*      active high */
+#define IOAPIC_RTE_INTALO	0x1U	/*      active low */
 
-#define IOAPIC_RTE_REM_IRR	0x00004000UL	/* RO: remote IRR */
+#define IOAPIC_RTE_DELIVS	0x1U	/* RO: delivery status */
 
-#define IOAPIC_RTE_INTPOL	0x00002000UL /*R/W:INT input pin polarity*/
-#define IOAPIC_RTE_INTAHI	0x00000000UL	/*      active high */
-#define IOAPIC_RTE_INTALO	0x00002000UL	/*      active low */
+#define IOAPIC_RTE_DESTPHY	0x0U	/*      physical */
+#define IOAPIC_RTE_DESTLOG	0x1U	/*      logical */
 
-#define IOAPIC_RTE_DELIVS	0x00001000UL	/* RO: delivery status */
-
-#define IOAPIC_RTE_DESTMOD	0x00000800UL	/*R/W:destination mode*/
-#define IOAPIC_RTE_DESTPHY	0x00000000UL	/*      physical */
-#define IOAPIC_RTE_DESTLOG	0x00000800UL	/*      logical */
-
-#define IOAPIC_RTE_DELMOD	0x00000700UL	/* R/W: delivery mode */
-#define IOAPIC_RTE_DELFIXED	0x00000000UL	/* fixed */
-#define IOAPIC_RTE_DELLOPRI	0x00000100UL	/* lowest priority */
-#define IOAPIC_RTE_DELSMI	0x00000200UL  /*System Management INT*/
-#define IOAPIC_RTE_DELRSV1	0x00000300UL	/*  reserved */
-#define IOAPIC_RTE_DELNMI	0x00000400UL	/*  NMI signal */
-#define IOAPIC_RTE_DELINIT	0x00000500UL	/* INIT signal */
-#define IOAPIC_RTE_DELRSV2	0x00000600UL	/* reserved */
-#define IOAPIC_RTE_DELEXINT	0x00000700UL	/* External INTerrupt */
-
-#define IOAPIC_RTE_INTVEC	0x000000ffUL /*R/W: INT vector field*/
+#define IOAPIC_RTE_DELFIXED	0x0U	/* fixed */
+#define IOAPIC_RTE_DELLOPRI	0x1U	/* lowest priority */
+#define IOAPIC_RTE_DELSMI	0x2U  /*System Management INT*/
+#define IOAPIC_RTE_DELRSV1	0x3U	/*  reserved */
+#define IOAPIC_RTE_DELNMI	0x4U	/*  NMI signal */
+#define IOAPIC_RTE_DELINIT	0x5U	/* INIT signal */
+#define IOAPIC_RTE_DELRSV2	0x6U	/* reserved */
+#define IOAPIC_RTE_DELEXINT	0x7U	/* External INTerrupt */
 
 #endif /* APICREG_H */

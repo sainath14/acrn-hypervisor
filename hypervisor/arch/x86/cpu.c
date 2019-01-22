@@ -114,6 +114,8 @@ void init_cpu_pre(uint16_t pcpu_id_args)
 		early_init_lapic();
 
 		init_percpu_lapic_id();
+
+		init_ioapic_id_info();
 	} else {
 		/* Switch this CPU to use the same page tables set-up by the
 		 * primary/boot CPU
