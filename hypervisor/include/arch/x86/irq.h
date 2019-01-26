@@ -50,7 +50,7 @@
 
 #define DEFAULT_DEST_MODE	IOAPIC_RTE_DESTLOG
 #define DEFAULT_DELIVERY_MODE	IOAPIC_RTE_DELLOPRI
-#define ALL_CPUS_MASK		((1UL << (uint64_t)get_pcpu_nums()) - 1UL)
+#define ALL_CPUS_MASK		(uint32_t) (((uint32_t)1U << (uint32_t) get_pcpu_nums()) - (uint32_t)1U)
 
 #define IRQ_ALLOC_BITMAP_SIZE	INT_DIV_ROUNDUP(NR_IRQS, 64U)
 
@@ -105,13 +105,22 @@ uint32_t irq_to_vector(uint32_t irq);
 /*
  * Some MSI message definitions
  */
-#define	MSI_ADDR_MASK	0xfff00000UL
-#define	MSI_ADDR_BASE	0xfee00000UL
-#define	MSI_ADDR_RH	0x00000008UL	/* Redirection Hint */
-#define	MSI_ADDR_LOG	0x00000004UL	/* Destination Mode */
-#define	MSI_ADDR_DEST	0x000FF000UL	/* Destination Field */
-
-#define	MSI_ADDR_DEST_SHIFT	(12U)
+#define	MSI_ADDR_BASE	0xfeeUL
+#define	MSI_ADDR_RH	0x1U	/* Redirection Hint */
+#define	MSI_ADDR_LOG	0x1U	/* Destination Mode Logical*/
+#define	MSI_ADDR_PHYS	0x0U	/* Destination Mode Logical*/
+#define MSI_DATA_DELFIXED	0x0U
+#define MSI_DATA_DELLOPRI	0x1U
+#define MSI_DATA_DELSMI		0x2U
+#define MSI_DATA_DELRSV1	0x3U
+#define MSI_DATA_DELNMI		0x4U
+#define MSI_DATA_DELINIT	0x5U
+#define MSI_DATA_DELRSV2	0x6U
+#define MSI_DATA_DELEXTINT	0x7U
+#define MSI_DATA_TRGREDG	0x0U
+#define MSI_DATA_TRGRLVL	0x1U
+#define MSI_DATA_LEVEL_DEASRT	0x0U
+#define MSI_DATA_LEVEL_ASSERT	0x1U
 
 /* RFLAGS */
 #define HV_ARCH_VCPU_RFLAGS_IF              (1UL<<9U)
