@@ -1,6 +1,6 @@
 choice
 	prompt "Hypervisor mode"
-	default SHARING_MODE
+	default PARTITION_MODE
 	help
 	  Select the usage mode of the hypervisor.
 
