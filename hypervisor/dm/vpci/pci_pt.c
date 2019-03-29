@@ -31,7 +31,6 @@
 
 #include <vm.h>
 #include <errno.h>
-#include <vtd.h>
 #include <ept.h>
 #include <mmu.h>
 #include <logmsg.h>
@@ -40,81 +39,6 @@
 static inline uint32_t pci_bar_base(uint32_t bar)
 {
 	return bar & PCIM_BAR_MEM_BASE;
-}
-
-#if defined(HV_DEBUG)
-/**
- * @pre vdev != NULL
- */
-static int32_t validate(const struct pci_vdev *vdev)
-{
-	uint32_t idx;
-	int32_t ret = 0;
-
-	for (idx = 0U; idx < PCI_BAR_COUNT; idx++) {
-		if ((vdev->bar[idx].base != 0x0UL)
-			|| ((vdev->bar[idx].size & 0xFFFUL) != 0x0UL)
-			|| ((vdev->bar[idx].type != PCIBAR_MEM32)
-			&& (vdev->bar[idx].type != PCIBAR_NONE))) {
-			ret = -EINVAL;
-			break;
-		}
-	}
-
-	return ret;
-}
-#endif
-
-/**
- * @pre vdev != NULL
- * @pre vdev->vpci != NULL
- * @pre vdev->vpci->vm != NULL
- */
-void vdev_pt_init(const struct pci_vdev *vdev)
-{
-	int32_t ret;
-	struct acrn_vm *vm = vdev->vpci->vm;
-	uint16_t pci_command;
-
-	ASSERT(validate(vdev) == 0, "Error, invalid bar defined");
-
-	/* Create an iommu domain for target VM if not created */
-	if (vm->iommu == NULL) {
-		if (vm->arch_vm.nworld_eptp == 0UL) {
-			vm->arch_vm.nworld_eptp = vm->arch_vm.ept_mem_ops.get_pml4_page(vm->arch_vm.ept_mem_ops.info);
-			sanitize_pte((uint64_t *)vm->arch_vm.nworld_eptp);
-		}
-		vm->iommu = create_iommu_domain(vm->vm_id,
-			hva2hpa(vm->arch_vm.nworld_eptp), 48U);
-	}
-
-	ret = assign_iommu_device(vm->iommu, (uint8_t)vdev->pdev->bdf.bits.b,
-		(uint8_t)(vdev->pdev->bdf.value & 0xFFU));
-	if (ret != 0) {
-		panic("failed to assign iommu device!");
-	}
-
-	pci_command = (uint16_t)pci_pdev_read_cfg(vdev->pdev->bdf, PCIR_COMMAND, 2U);
-	/* Disable INTX */
-	pci_command |= 0x400U;
-	pci_pdev_write_cfg(vdev->pdev->bdf, PCIR_COMMAND, 2U, pci_command);
-}
-
-/**
- * @pre vdev != NULL
- * @pre vdev->vpci != NULL
- * @pre vdev->vpci->vm != NULL
- */
-void vdev_pt_deinit(const struct pci_vdev *vdev)
-{
-	int32_t ret;
-	struct acrn_vm *vm = vdev->vpci->vm;
-
-	ret = unassign_iommu_device(vm->iommu, (uint8_t)vdev->pdev->bdf.bits.b,
-		(uint8_t)(vdev->pdev->bdf.value & 0xFFU));
-	if (ret != 0) {
-		panic("failed to unassign iommu device!");
-	}
 }
 
 /**
@@ -169,6 +93,7 @@ static void vdev_pt_cfgwrite_bar(struct pci_vdev *vdev, uint32_t offset,
 	uint32_t idx;
 	uint32_t new_bar, mask;
 	bool bar_update_normal;
+	bool is_msix_table_bar;
 
 	if ((bytes != 4U) || ((offset & 0x3U) != 0U)) {
 		return;
@@ -185,12 +110,18 @@ static void vdev_pt_cfgwrite_bar(struct pci_vdev *vdev, uint32_t offset,
 
 	case PCIBAR_MEM32:
 		bar_update_normal = (new_bar_uos != (uint32_t)~0U);
+		is_msix_table_bar = (has_msix_cap(vdev) && (idx == vdev->msix.table_bar));
 		new_bar = new_bar_uos & mask;
 		if (bar_update_normal) {
-			vdev_pt_remap_bar(vdev, idx,
-				pci_bar_base(new_bar));
+			if(is_msix_table_bar) {
+				vdev->bar[idx].base = pci_bar_base(new_bar);
+				vmsix_remap_table_bar(vdev);
+			} else {
+				vdev_pt_remap_bar(vdev, idx,
+					pci_bar_base(new_bar));
 
-			vdev->bar[idx].base = pci_bar_base(new_bar);
+				vdev->bar[idx].base = pci_bar_base(new_bar);
+			}
 		}
 		break;
 
@@ -218,4 +149,3 @@ int32_t vdev_pt_cfgwrite(struct pci_vdev *vdev, uint32_t offset,
 
 	return ret;
 }
-
