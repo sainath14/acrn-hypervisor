@@ -263,18 +263,14 @@ static struct ptirq_remapping_info *add_msix_remapping(struct acrn_vm *vm,
 
 	entry = ptirq_lookup_entry_by_sid(PTDEV_INTR_MSI, &phys_sid, NULL);
 	if (entry == NULL) {
-		if (ptirq_lookup_entry_by_sid(PTDEV_INTR_MSI, &virt_sid, vm) != NULL) {
-			pr_err("MSIX re-add vbdf%x", virt_bdf);
-		} else {
-			entry = ptirq_alloc_entry(vm, PTDEV_INTR_MSI);
-			if (entry != NULL) {
-				entry->phys_sid.value = phys_sid.value;
-				entry->virt_sid.value = virt_sid.value;
-				/* update msi source and active entry */
-				if (ptirq_activate_entry(entry, IRQ_INVALID) < 0) {
-					ptirq_release_entry(entry);
-					entry = NULL;
-				}
+		entry = ptirq_alloc_entry(vm, PTDEV_INTR_MSI);
+		if (entry != NULL) {
+			entry->phys_sid.value = phys_sid.value;
+			entry->virt_sid.value = virt_sid.value;
+			/* update msi source and active entry */
+			if (ptirq_activate_entry(entry, IRQ_INVALID) < 0) {
+				ptirq_release_entry(entry);
+				entry = NULL;
 			}
 		}
 	} else if (entry->vm != vm) {
@@ -350,7 +346,6 @@ static struct ptirq_remapping_info *add_intx_remapping(struct acrn_vm *vm, uint3
 	} else {
 		entry = ptirq_lookup_entry_by_sid(PTDEV_INTR_INTX, &phys_sid, NULL);
 		if (entry == NULL) {
-			if (ptirq_lookup_entry_by_vpin(vm, virt_pin, pic_pin) == NULL) {
 				entry = ptirq_alloc_entry(vm, PTDEV_INTR_INTX);
 				if (entry != NULL) {
 					entry->phys_sid.value = phys_sid.value;
@@ -362,9 +357,6 @@ static struct ptirq_remapping_info *add_intx_remapping(struct acrn_vm *vm, uint3
 						entry = NULL;
 					}
 				}
-			} else {
-				pr_err("INTX re-add vpin %d", virt_pin);
-			}
 		} else if (entry->vm != vm) {
 			if (is_sos_vm(entry->vm)) {
 				entry->vm = vm;
