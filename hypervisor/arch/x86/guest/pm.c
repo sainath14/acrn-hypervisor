@@ -239,7 +239,68 @@ static bool rt_vm_pm1a_io_write(struct acrn_vm *vm, uint16_t addr, size_t width,
 	return false;
 }
 
-void register_rt_vm_pm1a_ctl_handler(struct acrn_vm *vm)
+static bool vm_virtual_pm1a_cntl_io_read(struct acrn_vm *vm, struct acrn_vcpu *vcpu,
+						uint16_t addr, size_t width)
+{
+	struct pio_request *pio_req = &vcpu->req.reqs.pio;
+
+	pio_req->value = vm->pm.pm1_cntl;
+	return true;
+}
+
+static bool vm_virtual_pm1a_cntl_io_write(struct acrn_vm *vm, uint16_t addr, __unused size_t width,
+						uint32_t v)
+{
+	uint16_t val;
+
+	if (((v & VIRTUAL_PM1A_SLP_EN) && (((v & VIRTUAL_PM1A_SLP_TYP) >> 10U) == 5U)) != 0U) {
+		shutdown_vm();
+	}	
+}
+
+static bool vm_virtual_pm1a_evt_io_read(struct acrn_vm *vm, __unused struct acrn_vcpu *vcpu,
+						 uint16_t addr, size_t width)
+{
+	uint16_t val;
+	struct pio_request *pio_req = &vcpu->req.reqs.pio;
+
+	if (addr == VIRTUAL_PM1A_EVT_ADDR) { // status
+		val = vm->pm.pm1_status;
+	} else {
+		val = vm->pm.pm1_enable;  // enable
+	}
+	pio_req->value = val;
+
+	return true;
+}
+
+static bool vm_virtual_pm1a_evt_io_write(struct acrn_vm *vm,  uint16_t addr, __unused size_t width,
+						uint32_t v)
+{
+	uint16_t val;
+	union ioapic_rte rte;
+	vioapic_get_rte(vu->vm, vu->irq, &rte);
+
+	if (addr == VIRTUAL_PM1A_EVT_ADDR) { //status
+		/*
+		 * Support only power button status bit write
+		 */
+		vm->pm.pm1_status &= ~(v & PM1_PWRBTN_STS);
+		if (rte.bits.intr_polarity == IOAPIC_RTE_INTPOL_ALO) {
+			operation = GSI_SET_HIGH;
+		} else {
+			operation = GSI_SET_LOW;
+		}
+		vioapic_set_irqline_lock(vm, 9, operation);
+
+	} else {
+		vm->pm.pm1_enable = (v & PM1_PWRBTN_EN | PM1_GBL_EN);
+	}
+
+	return true;
+}
+
+void register_virtual_pm1a_handler(struct acrn_vm *vm)
 {
 	struct vm_io_range io_range;
 
@@ -247,6 +308,34 @@ void register_rt_vm_pm1a_ctl_handler(struct acrn_vm *vm)
 	io_range.base = VIRTUAL_PM1A_CNT_ADDR;
 	io_range.len = 1U;
 
+	io_range.flags = IO_ATTR_RW;
+	io_range.base = VIRTUAL_PM1A_EVT_ADDR;
+	io_range.len = 1U;
+
 	register_pio_emulation_handler(vm, VIRTUAL_PM1A_CNT_PIO_IDX, &io_range,
-					&rt_vm_pm1a_io_read, &rt_vm_pm1a_io_write);
+					&vm_virtual_pm1a_io_read, &rt_vm_pm1a_io_write);
+	register_pio_emulation_handler(vm, VIRTUAL_PM1A_EVT_PIO_IDX, &io_range,
+					&vm_virtual_pm1a_evt_io_read, &rt_vm_pm1a_evt_io_write);
+}
+
+void pm_update_power_btn_status(struct acrn_vm *vm)
+{
+	/*
+	 * Change PM1 status bit
+	 * Send vSCI
+	 */
+	union ioapic_rte rte;
+	vioapic_get_rte(vu->vm, vu->irq, &rte);
+
+	vm->pm.pm1_status |= PM1_PWRBTN_STS;
+
+	if (vm->pm.pm1_enable & PM1_PWRBTN_EN) {
+		if (rte.bits.intr_polarity == IOAPIC_RTE_INTPOL_ALO) {
+			operation = GSI_SET_LOW;
+		} else {
+			operation = GSI_SET_HIGH;
+		}
+		vioapic_set_irqline_lock(vm, 9, operation);
+	}
+	return;
 }

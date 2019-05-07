@@ -47,6 +47,7 @@ static int32_t shell_cpuid(int32_t argc, char **argv);
 static int32_t shell_trigger_crash(int32_t argc, char **argv);
 static int32_t shell_rdmsr(int32_t argc, char **argv);
 static int32_t shell_wrmsr(int32_t argc, char **argv);
+static int32_t shell_shutdown_vm(int32_t argc, char **argv);
 
 static struct shell_cmd shell_cmds[] = {
 	{
@@ -138,6 +139,12 @@ static struct shell_cmd shell_cmds[] = {
 		.cmd_param	= SHELL_CMD_WRMSR_PARAM,
 		.help_str	= SHELL_CMD_WRMSR_HELP,
 		.fcn		= shell_wrmsr,
+	},
+	{
+		.str		= SHELL_CMD_SHUTDOWN_VM,
+		.cmd_param	= SHELL_CMD_SHUTDOWN_VM_PARAM,
+		.help_str	= SHELL_CMD_SHUTDOWN_VM_HELP,
+		.fcn		= shell_shutdown_vm,
 	},
 };
 
@@ -1311,6 +1318,17 @@ static int32_t shell_rdmsr(int32_t argc, char **argv)
 	}
 
 	return ret;
+}
+
+static int32_t shell_shutdown_vm(int32_t argc, char **argv)
+{
+	char str[MAX_STR_SIZE] = {0};
+
+	pm_update_power_btn_status(vm);
+	snprintf(str, MAX_STR_SIZE, "vm is shutdown");
+	shell_puts(str);
+
+	return 0;
 }
 
 static int32_t shell_wrmsr(int32_t argc, char **argv)

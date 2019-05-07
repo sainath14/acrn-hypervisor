@@ -400,11 +400,13 @@ int32_t create_vm(uint16_t vm_id, struct acrn_vm_config *vm_config, struct acrn_
 
 		vm_setup_cpu_state(vm);
 
-		if (is_sos_vm(vm)) {
+		if (vm_config->guest_flags & GUEST_FLAG_SYS_PM_PRIVILEGE) {
 			/* Load pm S state data */
 			if (vm_load_pm_s_state(vm) == 0) {
 				register_pm1ab_handler(vm);
 			}
+		} else {
+			register_virtual_pm1a_handler(vm);
 		}
 		vpic_init(vm);
 
@@ -420,11 +422,6 @@ int32_t create_vm(uint16_t vm_id, struct acrn_vm_config *vm_config, struct acrn_
 
 		/* Init full emulated vIOAPIC instance */
 		vioapic_init(vm);
-
-		/* Intercept the virtual pm port for RTVM */
-		if (is_rt_vm(vm)) {
-			register_rt_vm_pm1a_ctl_handler(vm);
-		}
 
 		/* Populate return VM handle */
 		*rtn_vm = vm;
