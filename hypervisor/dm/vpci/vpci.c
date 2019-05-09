@@ -502,11 +502,15 @@ void sharing_mode_cfgread(__unused struct acrn_vpci *vpci, union pci_bdf bdf,
 
 	/* vdev == NULL: Could be hit for PCI enumeration from guests */
 	if (vdev != NULL) {
-		if ((vmsi_cfgread(vdev, offset, bytes, val) != 0)
-			&& (vmsix_cfgread(vdev, offset, bytes, val) != 0)
-			) {
-			/* Not handled by any handlers, passthru to physical device */
-			*val = pci_pdev_read_cfg(vdev->pdev->bdf, offset, bytes);
+		if (is_hostbridge(vdev)) {
+			(void)vhostbridge_cfgread(vdev, offset, bytes, val);
+		} else {
+			if ((vmsi_cfgread(vdev, offset, bytes, val) != 0)
+				&& (vmsix_cfgread(vdev, offset, bytes, val) != 0)
+				) {
+				/* Not handled by any handlers, passthru to physical device */
+				*val = pci_pdev_read_cfg(vdev->pdev->bdf, offset, bytes);
+			}
 		}
 	}
 }
@@ -520,11 +524,15 @@ void sharing_mode_cfgwrite(__unused struct acrn_vpci *vpci, union pci_bdf bdf,
 	struct pci_vdev *vdev = sharing_mode_find_vdev_sos(bdf);
 
 	if (vdev != NULL) {
-		if ((vmsi_cfgwrite(vdev, offset, bytes, val) != 0)
-			&& (vmsix_cfgwrite(vdev, offset, bytes, val) != 0)
-			) {
-			/* Not handled by any handlers, passthru to physical device */
-			pci_pdev_write_cfg(vdev->pdev->bdf, offset, bytes, val);
+		if (is_hostbridge(vdev)) {
+			(void)vhostbridge_cfgwrite(vdev, offset, bytes, val);
+		} else {
+			if ((vmsi_cfgwrite(vdev, offset, bytes, val) != 0)
+				&& (vmsix_cfgwrite(vdev, offset, bytes, val) != 0)
+				) {
+				/* Not handled by any handlers, passthru to physical device */
+				pci_pdev_write_cfg(vdev->pdev->bdf, offset, bytes, val);
+			}
 		}
 	}
 }
