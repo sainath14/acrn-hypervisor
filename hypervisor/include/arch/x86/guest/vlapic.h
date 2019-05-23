@@ -139,7 +139,7 @@ uint64_t apicv_get_pir_desc_paddr(struct acrn_vcpu *vcpu);
 uint64_t vlapic_get_tsc_deadline_msr(const struct acrn_vlapic *vlapic);
 void vlapic_set_tsc_deadline_msr(struct acrn_vlapic *vlapic, uint64_t val_arg);
 uint64_t vlapic_get_apicbase(const struct acrn_vlapic *vlapic);
-int32_t vlapic_set_apicbase(struct acrn_vlapic *vlapic, uint64_t new);
+int32_t vlapic_set_apicbase(struct acrn_vcpu *vcpu, uint64_t new);
 int32_t vlapic_x2apic_read(struct acrn_vcpu *vcpu, uint32_t msr, uint64_t *val);
 int32_t vlapic_x2apic_write(struct acrn_vcpu *vcpu, uint32_t msr, uint64_t val);
 
@@ -210,7 +210,7 @@ void vlapic_calc_dest(struct acrn_vm *vm, uint64_t *dmask, bool is_broadcast,
 		uint32_t dest, bool phys, bool lowprio);
 void vlapic_calc_dest_lapic_pt(struct acrn_vm *vm, uint64_t *dmask, bool is_broadcast,
 		uint32_t dest, bool phys);
-bool is_lapic_pt_enabled(struct acrn_vm *vm);
+bool is_x2apic_enabled(const struct acrn_vlapic *vlapic);
 /**
  * @}
  */

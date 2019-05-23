@@ -634,24 +634,31 @@ int32_t ptirq_msix_remap(struct acrn_vm *vm, uint16_t virt_bdf, uint16_t phys_bd
 	spinlock_release(&ptdev_lock);
 
 	if (entry != NULL) {
+		ret = 0;
 		if (is_entry_active(entry) && (info->vmsi_data.full == 0U)) {
 			/* handle destroy case */
 			info->pmsi_data.full = 0U;
 		} else {
 			/* build physical config MSI, update to info->pmsi_xxx */
-			if (is_lapic_pt_enabled(vm)) {
-				/* for vm with lapic-pt, keep vector from guest */
-				ptirq_build_physical_msi(vm, info, entry, (uint32_t)info->vmsi_data.bits.vector);
+			if (is_lapic_pt_configured(vm)) {
+				if (is_vm_x2apic_transition_completed(vm)) {
+					/* for vm with lapic-pt, keep vector from guest */
+					ptirq_build_physical_msi(vm, info, entry, (uint32_t)info->vmsi_data.bits.vector);
+				} else {
+					ret = -EFAULT;
+				}
+
 			} else {
 				ptirq_build_physical_msi(vm, info, entry, irq_to_vector(entry->allocated_pirq));
 			}
 
-			entry->msi = *info;
-			dev_dbg(ACRN_DBG_IRQ, "PCI %x:%x.%x MSI VR[%d] 0x%x->0x%x assigned to vm%d",
+			if (ret == 0) {
+				entry->msi = *info;
+				dev_dbg(ACRN_DBG_IRQ, "PCI %x:%x.%x MSI VR[%d] 0x%x->0x%x assigned to vm%d",
 				pci_bus(virt_bdf), pci_slot(virt_bdf), pci_func(virt_bdf), entry_nr,
 				info->vmsi_data.bits.vector, irq_to_vector(entry->allocated_pirq), entry->vm->vm_id);
+			}
 		}
-		ret = 0;
 	}
 
 	return ret;

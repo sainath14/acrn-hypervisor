@@ -102,6 +102,7 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm)
 	return ((vm_config->guest_flags & GUEST_FLAG_LAPIC_PASSTHROUGH) != 0U);
 }
 
+
 /**
  * @pre vm != NULL && vm_config != NULL && vm->vmid < CONFIG_MAX_VM_NUM
  */
@@ -110,6 +111,16 @@ bool is_rt_vm(const struct acrn_vm *vm)
 	struct acrn_vm_config *vm_config = get_vm_config(vm->vm_id);
 
 	return ((vm_config->guest_flags & GUEST_FLAG_RT) != 0U);
+}
+
+bool is_vm_x2apic_transition_completed(const struct acrn_vm *vm)
+{
+	bool transition_done = true;
+
+	if ((vm->hw.vcpus_in_x2apic > 0U) && (vm->hw.created_vcpus != vm->hw.vcpus_in_x2apic)) {
+		transition_done = false;
+	}
+	return transition_done;
 }
 
 /**
@@ -546,7 +557,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 			reset_vcpu(vcpu);
 			offline_vcpu(vcpu);
 
-			if (is_lapic_pt_enabled(vm)) {
+			if (is_lapic_pt_enabled(vcpu)) {
 				bitmap_set_nolock(vcpu->pcpu_id, &mask);
 				make_pcpu_offline(vcpu->pcpu_id);
 			}
@@ -554,7 +565,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 
 		wait_pcpus_offline(mask);
 
-		if (is_lapic_pt_enabled(vm) && !start_pcpus(mask)) {
+		if (is_lapic_pt_configured(vm) && !start_pcpus(mask)) {
 			pr_fatal("Failed to start all cpus in mask(0x%llx)", mask);
 			ret = -ETIMEDOUT;
 		}

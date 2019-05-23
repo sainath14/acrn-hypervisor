@@ -33,6 +33,7 @@ struct vm_hw_info {
 	/* vcpu array of this VM */
 	struct acrn_vcpu vcpu_array[CONFIG_MAX_VCPUS_PER_VM];
 	uint16_t created_vcpus;	/* Number of created vcpus */
+	uint16_t vcpus_in_x2apic; 
 } __aligned(PAGE_SIZE);
 
 struct sw_linux {
@@ -218,7 +219,7 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm);
 bool is_rt_vm(const struct acrn_vm *vm);
 bool is_highest_severity_vm(const struct acrn_vm *vm);
 bool vm_hide_mtrr(const struct acrn_vm *vm);
-
+bool is_vm_x2apic_transition_completed(const struct acrn_vm *vm);
 #endif /* !ASSEMBLER */
 
 #endif /* VM_H_ */
