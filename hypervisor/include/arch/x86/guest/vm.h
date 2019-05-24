@@ -215,6 +215,7 @@ extern vm_sw_loader_t vm_sw_loader;
 void vrtc_init(struct acrn_vm *vm);
 
 bool is_lapic_pt_configured(const struct acrn_vm *vm);
+bool is_lapic_pt_enabled(struct acrn_vm *vm);
 bool is_rt_vm(const struct acrn_vm *vm);
 bool is_highest_severity_vm(const struct acrn_vm *vm);
 bool vm_hide_mtrr(const struct acrn_vm *vm);

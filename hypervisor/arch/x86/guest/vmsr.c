@@ -414,7 +414,7 @@ int32_t rdmsr_vmexit_handler(struct acrn_vcpu *vcpu)
 	}
 	default:
 	{
-		if (is_x2apic_msr(msr)) {
+		if ((is_x2apic_msr(msr)) && (is_x2apic_enabled(vcpu_vlapic(vcpu)))) {
 			err = vlapic_x2apic_read(vcpu, msr, &v);
 		} else {
 			pr_warn("%s(): vm%d vcpu%d reading MSR %lx not supported",
@@ -633,7 +633,7 @@ int32_t wrmsr_vmexit_handler(struct acrn_vcpu *vcpu)
 	}
 	default:
 	{
-		if (is_x2apic_msr(msr)) {
+		if ((is_x2apic_msr(msr)) && (is_x2apic_enabled(vcpu_vlapic(vcpu))))  {
 			err = vlapic_x2apic_write(vcpu, msr, v);
 		} else {
 			pr_warn("%s(): vm%d vcpu%d writing MSR %lx not supported",

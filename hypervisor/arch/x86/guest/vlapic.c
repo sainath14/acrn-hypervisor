@@ -105,7 +105,6 @@ static void vlapic_set_error(struct acrn_vlapic *vlapic, uint32_t mask);
 
 static void vlapic_timer_expired(void *data);
 
-static inline bool is_x2apic_enabled(const struct acrn_vlapic *vlapic);
 
 static inline bool vlapic_enabled(const struct acrn_vlapic *vlapic)
 {
@@ -1971,7 +1970,7 @@ static void vlapic_timer_expired(void *data)
 /*
  * @pre vm != NULL
  */
-static inline bool is_x2apic_enabled(const struct acrn_vlapic *vlapic)
+bool is_x2apic_enabled(const struct acrn_vlapic *vlapic)
 {
 	bool ret;
 	if ((vlapic_get_apicbase(vlapic) & APICBASE_X2APIC) == 0UL) {
@@ -2074,23 +2073,21 @@ int32_t vlapic_x2apic_read(struct acrn_vcpu *vcpu, uint32_t msr, uint64_t *val)
 	 * inject a GP to guest
 	 */
 	vlapic = vcpu_vlapic(vcpu);
-	if (is_x2apic_enabled(vlapic)) {
-		if (is_lapic_pt_configured(vcpu->vm)) {
-			switch (msr) {
-			case MSR_IA32_EXT_APIC_LDR:
-			case MSR_IA32_EXT_XAPICID:
-				offset = x2apic_msr_to_regoff(msr);
-				error = vlapic_read(vlapic, offset, val);
-				break;
-			default:
-				pr_err("%s: unexpected MSR[0x%x] read with lapic_pt", __func__, msr);
-				break;
-			}
-		} else {
+	if (is_lapic_pt_configured(vcpu->vm)) {
+		switch (msr) {
+		case MSR_IA32_EXT_APIC_LDR:
+		case MSR_IA32_EXT_XAPICID:
 			offset = x2apic_msr_to_regoff(msr);
-			if (apicv_ops->x2apic_read_msr_may_valid(offset)) {
-				error = vlapic_read(vlapic, offset, val);
-			}
+			error = vlapic_read(vlapic, offset, val);
+			break;
+		default:
+			pr_err("%s: unexpected MSR[0x%x] read with lapic_pt", __func__, msr);
+			break;
+		}
+	} else {
+		offset = x2apic_msr_to_regoff(msr);
+		if (apicv_ops->x2apic_read_msr_may_valid(offset)) {
+			error = vlapic_read(vlapic, offset, val);
 		}
 	}
 
@@ -2108,21 +2105,19 @@ int32_t vlapic_x2apic_write(struct acrn_vcpu *vcpu, uint32_t msr, uint64_t val)
 	 * inject a GP to guest
 	 */
 	vlapic = vcpu_vlapic(vcpu);
-	if (is_x2apic_enabled(vlapic)) {
-		if (is_lapic_pt_configured(vcpu->vm)) {
-			switch (msr) {
-			case MSR_IA32_EXT_APIC_ICR:
-				error = vlapic_x2apic_pt_icr_access(vcpu->vm, val);
-				break;
-			default:
-				pr_err("%s: unexpected MSR[0x%x] write with lapic_pt", __func__, msr);
-				break;
-			}
-		} else {
-			offset = x2apic_msr_to_regoff(msr);
-			if (apicv_ops->x2apic_write_msr_may_valid(offset)) {
-				error = vlapic_write(vlapic, offset, val);
-			}
+	if (is_lapic_pt_configured(vcpu->vm)) {
+		switch (msr) {
+		case MSR_IA32_EXT_APIC_ICR:
+			error = vlapic_x2apic_pt_icr_access(vcpu->vm, val);
+			break;
+		default:
+			pr_err("%s: unexpected MSR[0x%x] write with lapic_pt", __func__, msr);
+			break;
+		}
+	} else {
+		offset = x2apic_msr_to_regoff(msr);
+		if (apicv_ops->x2apic_write_msr_may_valid(offset)) {
+			error = vlapic_write(vlapic, offset, val);
 		}
 	}
 
@@ -2574,15 +2569,4 @@ void vlapic_set_apicv_ops(void)
 	} else {
 		apicv_ops = &apicv_basic_ops;
 	}
-}
-
-/**
- * @pre vm != NULL 
- * @pre vm->vmid < CONFIG_MAX_VM_NUM
- */
-bool is_lapic_pt_enabled(struct acrn_vm *vm)
-{
-	struct acrn_vcpu *vcpu = vcpu_from_vid(vm, 0U);
-
-	return ((is_x2apic_enabled(vcpu_vlapic(vcpu))) && (is_lapic_pt_configured(vm)));
 }

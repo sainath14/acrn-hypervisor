@@ -738,3 +738,11 @@ uint64_t vcpumask2pcpumask(struct acrn_vm *vm, uint64_t vdmask)
 
 	return dmask;
 }
+
+/*
+ *  @pre vcpu != NULL
+ */
+bool is_vcpu_x2apic_enabled(struct acrn_vcpu *vcpu)
+{
+	return is_x2apic_enabled(vcpu_vlapic(vcpu));
+}

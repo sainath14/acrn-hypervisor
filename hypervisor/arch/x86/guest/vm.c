@@ -102,6 +102,17 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm)
 }
 
 /**
+ * @pre vm != NULL
+ * @pre vm->vmid < CONFIG_MAX_VM_NUM
+ */
+bool is_lapic_pt_enabled(struct acrn_vm *vm)
+{
+	struct acrn_vcpu *vcpu = vcpu_from_vid(vm, 0U);
+
+	return ((is_vcpu_x2apic_enabled(vcpu)) && (is_lapic_pt_configured(vm)));
+}
+
+/**
  * @pre vm != NULL && vm_config != NULL && vm->vmid < CONFIG_MAX_VM_NUM
  */
 bool is_rt_vm(const struct acrn_vm *vm)

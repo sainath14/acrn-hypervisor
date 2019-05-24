@@ -749,6 +749,16 @@ int32_t prepare_vcpu(struct acrn_vm *vm, uint16_t pcpu_id);
 uint64_t vcpumask2pcpumask(struct acrn_vm *vm, uint64_t vdmask);
 
 /**
+ * @brief Check if vCPU has x2APIC mode enabled
+ *
+ *
+ * @param[in] vcpu pointer to vcpu data structure
+ *
+ * @return true if vCPU has x2APIC mode enabled
+ * @return false if vCPU has xAPIC mode enabled
+ */
+bool is_vcpu_x2apic_enabled(struct acrn_vcpu *vcpu);
+/**
  * @}
  */
 /* End of acrn_vcpu */
