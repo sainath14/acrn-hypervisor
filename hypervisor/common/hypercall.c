@@ -472,6 +472,7 @@ int32_t hcall_inject_msi(struct acrn_vm *vm, uint16_t vmid, uint64_t param)
 	int32_t ret = -1;
 	struct acrn_msi_entry msi;
 	struct acrn_vm *target_vm = get_vm_from_vmid(vmid);
+	enum vm_lapic_state lapic_state = vm_check_lapic_state(vm);
 
 	if (!is_poweroff_vm(target_vm) && is_postlaunched_vm(target_vm)) {
 		(void)memset((void *)&msi, 0U, sizeof(msi));
@@ -479,9 +480,15 @@ int32_t hcall_inject_msi(struct acrn_vm *vm, uint16_t vmid, uint64_t param)
 			pr_err("%s: Unable copy param to vm\n", __func__);
 		} else {
 			/* For target cpu with lapic pt, send ipi instead of injection via vlapic */
-			if (is_lapic_pt_enabled(target_vm)) {
-				inject_msi_lapic_pt(target_vm, &msi);
-				ret = 0;
+			if (is_lapic_pt_configured(target_vm)) {
+				if (lapic_state == VM_LAPIC_X2APIC) {
+					inject_msi_lapic_pt(target_vm, &msi);
+					ret = 0;
+				} else if (lapic_state == VM_LAPIC_XAPIC) {
+					ret = vlapic_intr_msi(target_vm, msi.msi_addr, msi.msi_data);
+				} else {
+					ret = -EFAULT;
+				}
 			} else {
 				ret = vlapic_intr_msi(target_vm, msi.msi_addr, msi.msi_data);
 			}

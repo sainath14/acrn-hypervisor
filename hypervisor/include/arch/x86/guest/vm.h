@@ -33,6 +33,7 @@ struct vm_hw_info {
 	/* vcpu array of this VM */
 	struct acrn_vcpu vcpu_array[CONFIG_MAX_VCPUS_PER_VM];
 	uint16_t created_vcpus;	/* Number of created vcpus */
+	uint16_t vcpus_in_x2apic; 
 } __aligned(PAGE_SIZE);
 
 struct sw_linux {
@@ -84,6 +85,12 @@ enum vm_state {
 	VM_STARTED,	/* VM started (booted) */
 	VM_POWERING_OFF,     /* RTVM only, it is trying to poweroff by itself */
 	VM_PAUSED,	/* VM paused */
+};
+
+enum vm_lapic_state {
+	VM_LAPIC_XAPIC = 0,
+	VM_LAPIC_X2APIC,
+	VM_LAPIC_X2APIC_TRANSITION
 };
 
 struct vm_arch {
@@ -218,7 +225,7 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm);
 bool is_rt_vm(const struct acrn_vm *vm);
 bool is_highest_severity_vm(const struct acrn_vm *vm);
 bool vm_hide_mtrr(const struct acrn_vm *vm);
-
+enum vm_lapic_state vm_check_lapic_state(const struct acrn_vm *vm);
 #endif /* !ASSEMBLER */
 
 #endif /* VM_H_ */
