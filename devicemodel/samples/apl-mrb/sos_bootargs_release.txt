@@ -1,3 +1,4 @@
+Linux_bzImage
 module_blacklist=dwc3_pci
 no_timer_check
 console=tty0

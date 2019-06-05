@@ -31,6 +31,7 @@ struct vm_hw_info {
 	/* vcpu array of this VM */
 	struct acrn_vcpu vcpu_array[CONFIG_MAX_VCPUS_PER_VM];
 	uint16_t created_vcpus;	/* Number of created vcpus */
+	uint16_t vcpus_in_x2apic;
 } __aligned(PAGE_SIZE);
 
 struct sw_module_info {
@@ -76,6 +77,12 @@ enum vm_state {
 	VM_PAUSED,	/* VM paused */
 };
 
+enum vm_vlapic_state {
+	VM_VLAPIC_XAPIC = 0,
+	VM_VLAPIC_X2APIC,
+	VM_VLAPIC_TRANSITION
+};
+
 struct vm_arch {
 	/* I/O bitmaps A and B for this VM, MUST be 4-Kbyte aligned */
 	uint8_t io_bitmap[PAGE_SIZE*2];
@@ -93,6 +100,7 @@ struct vm_arch {
 	void *tmp_pg_array;	/* Page array for tmp guest paging struct */
 	struct acrn_vioapic vioapic;	/* Virtual IOAPIC base address */
 	struct acrn_vpic vpic;      /* Virtual PIC */
+	enum vm_vlapic_state vlapic_state; /* Represents vLAPIC state across vCPUs*/
 
 	/* reference to virtual platform to come here (as needed) */
 } __aligned(PAGE_SIZE);
@@ -136,6 +144,7 @@ struct acrn_vm {
 	uint8_t vrtc_offset;
 
 	spinlock_t softirq_dev_lock;
+	spinlock_t vlapic_state_lock;
 	struct list_head softirq_dev_entry_list;
 	uint64_t intr_inject_delay_delta; /* delay of intr injection */
 } __aligned(PAGE_SIZE);
@@ -208,7 +217,8 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm);
 bool is_rt_vm(const struct acrn_vm *vm);
 bool is_highest_severity_vm(const struct acrn_vm *vm);
 bool vm_hide_mtrr(const struct acrn_vm *vm);
-
+void update_vm_vlapic_state(struct acrn_vm *vm);
+enum vm_vlapic_state check_vm_vlapic_state(struct acrn_vm *vm);
 #endif /* !ASSEMBLER */
 
 #endif /* VM_H_ */

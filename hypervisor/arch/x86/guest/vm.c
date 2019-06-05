@@ -102,6 +102,7 @@ bool is_lapic_pt_configured(const struct acrn_vm *vm)
 	return ((vm_config->guest_flags & GUEST_FLAG_LAPIC_PASSTHROUGH) != 0U);
 }
 
+
 /**
  * @pre vm != NULL && vm_config != NULL && vm->vmid < CONFIG_MAX_VM_NUM
  */
@@ -110,6 +111,43 @@ bool is_rt_vm(const struct acrn_vm *vm)
 	struct acrn_vm_config *vm_config = get_vm_config(vm->vm_id);
 
 	return ((vm_config->guest_flags & GUEST_FLAG_RT) != 0U);
+}
+/*
+ * @brief Check status of vLAPICs of a VM
+ * vLAPICs of VM switch between modes in an asynchronous fashion. This API
+ * captures the "transition" state triggered when one vLAPIC switches mode.
+ * Also captures "x2APIC" mode when all the vLAPICs of the VM are in x2APIC mode.
+ * When the VM is created, the state is set to "xAPIC" as all vLAPICs are setup
+ * in xAPIC mode.
+ *
+ * Upon reset, all vLAPICs switch to xAPIC mode accroding to SDM 10.12.5
+ * Considering VM uses x2apic mode for vLAPIC, in reset or shutdown flow, vLAPIC state
+ * moves to "xAPIC" directly without going thru "transition".
+ * TODO: When ACRN supports CPU offline feature for guests with LAPIC_PASSTHROUGH,
+ * need to revisit this design.
+ *
+ * @pre vm != NULL
+ *
+ */
+void update_vm_vlapic_state(struct acrn_vm *vm)
+{
+	spinlock_obtain(&vm->vlapic_state_lock);
+	vm->arch_vm.vlapic_state = VM_VLAPIC_TRANSITION;
+	vm->hw.vcpus_in_x2apic++;
+	if (vm->hw.created_vcpus == vm->hw.vcpus_in_x2apic) {
+		vm->arch_vm.vlapic_state = VM_VLAPIC_X2APIC;
+	}
+	spinlock_release(&vm->vlapic_state_lock);
+}
+
+enum vm_vlapic_state check_vm_vlapic_state(struct acrn_vm *vm)
+{
+	enum vm_vlapic_state vlapic_state;
+
+	spinlock_obtain(&vm->vlapic_state_lock);
+	vlapic_state = vm->arch_vm.vlapic_state;
+	spinlock_release(&vm->vlapic_state_lock);
+	return vlapic_state;
 }
 
 /**
@@ -462,6 +500,8 @@ int32_t create_vm(uint16_t vm_id, struct acrn_vm_config *vm_config, struct acrn_
 
 		INIT_LIST_HEAD(&vm->softirq_dev_entry_list);
 		spinlock_init(&vm->softirq_dev_lock);
+		spinlock_init(&vm->vlapic_state_lock);
+		vm->arch_vm.vlapic_state = VM_VLAPIC_XAPIC;
 		vm->intr_inject_delay_delta = 0UL;
 
 		/* Set up IO bit-mask such that VM exit occurs on
@@ -546,7 +586,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 			reset_vcpu(vcpu);
 			offline_vcpu(vcpu);
 
-			if (is_lapic_pt_enabled(vm)) {
+			if (is_lapic_pt_enabled(vcpu)) {
 				bitmap_set_nolock(vcpu->pcpu_id, &mask);
 				make_pcpu_offline(vcpu->pcpu_id);
 			}
@@ -554,7 +594,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 
 		wait_pcpus_offline(mask);
 
-		if (is_lapic_pt_enabled(vm) && !start_pcpus(mask)) {
+		if (is_lapic_pt_configured(vm) && !start_pcpus(mask)) {
 			pr_fatal("Failed to start all cpus in mask(0x%llx)", mask);
 			ret = -ETIMEDOUT;
 		}
@@ -622,6 +662,8 @@ int32_t reset_vm(struct acrn_vm *vm)
 		destroy_secure_world(vm, false);
 		vm->sworld_control.flag.active = 0UL;
 		vm->state = VM_CREATED;
+		vm->arch_vm.vlapic_state = VM_VLAPIC_XAPIC;
+		vcpu->vm->hw.vcpus_in_x2apic = 0;
 		ret = 0;
 	} else {
 		ret = -1;

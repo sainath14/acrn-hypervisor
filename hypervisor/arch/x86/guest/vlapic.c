@@ -57,6 +57,7 @@ static inline uint32_t prio(uint32_t x)
 
 #define	APICBASE_BSP		0x00000100UL
 #define	APICBASE_X2APIC		0x00000400U
+#define	APICBASE_XAPIC		0x00000800U
 #define	APICBASE_ENABLED	0x00000800UL
 #define LOGICAL_ID_MASK		0xFU
 #define CLUSTER_ID_MASK		0xFFFF0U
@@ -105,7 +106,6 @@ static void vlapic_set_error(struct acrn_vlapic *vlapic, uint32_t mask);
 
 static void vlapic_timer_expired(void *data);
 
-static inline bool is_x2apic_enabled(const struct acrn_vlapic *vlapic);
 
 static inline bool vlapic_enabled(const struct acrn_vlapic *vlapic)
 {
@@ -1679,6 +1679,7 @@ vlapic_reset(struct acrn_vlapic *vlapic)
 	/*
 	 * Upon reset, vlapic is set to xAPIC mode.
 	 */
+
 	vlapic->msr_apicbase = DEFAULT_APIC_BASE | APICBASE_ENABLED;
 
 	if (vlapic->vcpu->vcpu_id == BOOT_CPU_ID) {
@@ -1763,20 +1764,30 @@ int32_t vlapic_set_apicbase(struct acrn_vlapic *vlapic, uint64_t new)
 {
 	int32_t ret = 0;
 	uint64_t changed;
+	struct acrn_vcpu *vcpu = vlapic->vcpu;
+	bool is_lapic_mode_changed = false;
+
 	changed = vlapic->msr_apicbase ^ new;
 
-	if ((changed == APICBASE_X2APIC) && ((new & APICBASE_X2APIC) == APICBASE_X2APIC)) {
+	if (vlapic->msr_apicbase != new) {
+		/*
+		 * Make sure bits other than 11:10 are not changed
+		 */
+		is_lapic_mode_changed = ((changed & ~(APICBASE_XAPIC | APICBASE_X2APIC)) == 0UL);
+
+		if ((is_lapic_mode_changed) &&
+			(new & (APICBASE_XAPIC | APICBASE_X2APIC)) ==
+				(APICBASE_XAPIC | APICBASE_X2APIC)) {
 			atomic_set64(&vlapic->msr_apicbase, changed);
 			vlapic_build_x2apic_id(vlapic);
 			switch_apicv_mode_x2apic(vlapic->vcpu);
-			ret = 0;
-	} else if (vlapic->msr_apicbase != new) {
-		dev_dbg(ACRN_DBG_LAPIC,
-			"NOT support to change APIC_BASE MSR from %#lx to %#lx",
-			vlapic->msr_apicbase, new);
-		ret = -1;
-	} else {
-		/* No other state currently, do nothing */
+			update_vm_vlapic_state(vcpu->vm);
+		} else {
+			dev_dbg(ACRN_DBG_LAPIC,
+				"NOT support to change APIC_BASE MSR from %#lx to %#lx",
+				vlapic->msr_apicbase, new);
+			ret = -1;
+		}
 	}
 
 	return ret;
@@ -1969,7 +1980,7 @@ static void vlapic_timer_expired(void *data)
 /*
  * @pre vm != NULL
  */
-static inline bool is_x2apic_enabled(const struct acrn_vlapic *vlapic)
+bool is_x2apic_enabled(const struct acrn_vlapic *vlapic)
 {
 	bool ret;
 	if ((vlapic_get_apicbase(vlapic) & APICBASE_X2APIC) == 0UL) {
@@ -2027,11 +2038,13 @@ vlapic_x2apic_pt_icr_access(struct acrn_vm *vm, uint64_t val)
 			break;
 			default:
 				/* convert the dest from virtual apic_id to physical apic_id */
-				papic_id = per_cpu(lapic_id, target_vcpu->pcpu_id);
-				dev_dbg(ACRN_DBG_LAPICPT,
-					"%s vapic_id: 0x%08lx papic_id: 0x%08lx icr_low:0x%08lx",
-					 __func__, vapic_id, papic_id, icr_low);
-				msr_write(MSR_IA32_EXT_APIC_ICR, (((uint64_t)papic_id) << 32U) | icr_low);
+				if (is_x2apic_enabled(vcpu_vlapic(target_vcpu))) {
+					papic_id = per_cpu(lapic_id, target_vcpu->pcpu_id);
+					dev_dbg(ACRN_DBG_LAPICPT,
+						"%s vapic_id: 0x%08lx papic_id: 0x%08lx icr_low:0x%08lx",
+						 __func__, vapic_id, papic_id, icr_low);
+					msr_write(MSR_IA32_EXT_APIC_ICR, (((uint64_t)papic_id) << 32U) | icr_low);
+				}
 			break;
 			}
 			ret = 0;
@@ -2572,15 +2585,4 @@ void vlapic_set_apicv_ops(void)
 	} else {
 		apicv_ops = &apicv_basic_ops;
 	}
-}
-
-/**
- * @pre vm != NULL 
- * @pre vm->vmid < CONFIG_MAX_VM_NUM
- */
-bool is_lapic_pt_enabled(struct acrn_vm *vm)
-{
-	struct acrn_vcpu *vcpu = vcpu_from_vid(vm, 0U);
-
-	return ((is_x2apic_enabled(vcpu_vlapic(vcpu))) && (is_lapic_pt_configured(vm)));
 }
