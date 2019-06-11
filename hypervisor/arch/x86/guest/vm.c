@@ -462,6 +462,9 @@ int32_t create_vm(uint16_t vm_id, struct acrn_vm_config *vm_config, struct acrn_
 
 		INIT_LIST_HEAD(&vm->softirq_dev_entry_list);
 		spinlock_init(&vm->softirq_dev_lock);
+		spinlock_init(&vm->vm_lock);
+
+		vm->arch_vm.vlapic_state = VM_VLAPIC_XAPIC;
 		vm->intr_inject_delay_delta = 0UL;
 
 		/* Set up IO bit-mask such that VM exit occurs on
@@ -546,7 +549,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 			reset_vcpu(vcpu);
 			offline_vcpu(vcpu);
 
-			if (is_lapic_pt_enabled(vm)) {
+			if (is_lapic_pt_enabled(vcpu)) {
 				bitmap_set_nolock(vcpu->pcpu_id, &mask);
 				make_pcpu_offline(vcpu->pcpu_id);
 			}
@@ -554,7 +557,7 @@ int32_t shutdown_vm(struct acrn_vm *vm)
 
 		wait_pcpus_offline(mask);
 
-		if (is_lapic_pt_enabled(vm) && !start_pcpus(mask)) {
+		if (is_lapic_pt_configured(vm) && !start_pcpus(mask)) {
 			pr_fatal("Failed to start all cpus in mask(0x%llx)", mask);
 			ret = -ETIMEDOUT;
 		}
@@ -622,6 +625,11 @@ int32_t reset_vm(struct acrn_vm *vm)
 		destroy_secure_world(vm, false);
 		vm->sworld_control.flag.active = 0UL;
 		vm->state = VM_CREATED;
+
+		/*
+		 * Set VM vLAPIC state to VM_VLAPIC_XAPIC
+		 */
+		vm->arch_vm.vlapic_state = VM_VLAPIC_XAPIC;
 		ret = 0;
 	} else {
 		ret = -1;
@@ -748,4 +756,72 @@ void launch_vms(uint16_t pcpu_id)
 			}
 		}
 	}
+}
+
+/*
+ * @brief Update state of vLAPICs of a VM
+ * vLAPICs of VM switch between modes in an asynchronous fashion. This API
+ * captures the "transition" state triggered when one vLAPIC switches mode.
+ * When the VM is created, the state is set to "xAPIC" as all vLAPICs are setup
+ * in xAPIC mode.
+ *
+ * Upon reset, all LAPICs switch to xAPIC mode accroding to SDM 10.12.5
+ * Considering VM uses x2apic mode for vLAPIC, in reset or shutdown flow, vLAPIC state
+ * moves to "xAPIC" directly without going thru "transition".
+ *
+ * VM_VLAPIC_X2APIC - All the online vCPUs/vLAPICs of this VM use x2APIC mode
+ * VM_VLAPIC_XAPIC - All the online vCPUs/vLAPICs of this VM use xAPIC mode
+ * VM_VLAPIC_DISABLED - All the online vCPUs/vLAPICs of this VM are in Disabled mode
+ * VM_VLAPIC_TRANSITION - Online vCPUs/vLAPICs of this VM are in between transistion
+ *
+ * TODO: offline_vcpu need to call this API to reflect the status of rest of the
+ * vLAPICs that are online.
+ *
+ * @pre vm != NULL
+ */
+void update_vm_vlapic_state(struct acrn_vm *vm)
+{
+	uint16_t i;
+	bool first_vcpu_vlapic_mode_checked = false;
+	struct acrn_vcpu *vcpu;
+	enum vm_vlapic_state temp_vm_vlapic_state = VM_VLAPIC_XAPIC;
+	enum vm_vlapic_state vm_vlapic_state = VM_VLAPIC_XAPIC;
+
+	spinlock_obtain(&vm->vm_lock);
+	foreach_vcpu(i, vm, vcpu) {
+		if (is_x2apic_enabled(vcpu_vlapic(vcpu))) {
+			temp_vm_vlapic_state = VM_VLAPIC_X2APIC;
+		} else if (is_xapic_enabled(vcpu_vlapic(vcpu))) {
+			temp_vm_vlapic_state = VM_VLAPIC_XAPIC;
+		} else {
+			temp_vm_vlapic_state = VM_VLAPIC_DISABLED;
+		}
+
+		if (!first_vcpu_vlapic_mode_checked) {
+			vm_vlapic_state = temp_vm_vlapic_state;
+			first_vcpu_vlapic_mode_checked = true;
+		} else {
+			if (vm_vlapic_state != temp_vm_vlapic_state) {
+				vm_vlapic_state = VM_VLAPIC_TRANSITION;
+				break;
+			}
+		}
+	}
+	vm->arch_vm.vlapic_state = vm_vlapic_state;
+	spinlock_release(&vm->vm_lock);
+}
+
+/*
+ * @brief Check state of vLAPICs of a VM
+ *
+ * @pre vm != NULL
+ */
+enum vm_vlapic_state check_vm_vlapic_state(struct acrn_vm *vm)
+{
+	enum vm_vlapic_state vlapic_state;
+
+	spinlock_obtain(&vm->vm_lock);
+	vlapic_state = vm->arch_vm.vlapic_state;
+	spinlock_release(&vm->vm_lock);
+	return vlapic_state;
 }
