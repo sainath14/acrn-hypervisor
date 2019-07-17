@@ -153,10 +153,11 @@ static inline void *ept_get_sworld_memory_base(const union pgtable_pages_info *i
 	return info->ept.sworld_memory_base;
 }
 
-void init_ept_mem_ops(struct acrn_vm *vm)
+void init_ept_mem_ops(struct acrn_vm *vm, bool is_vm_sos)
 {
 	uint16_t vm_id = vm->vm_id;
-	if (vm_id != 0U) {
+
+	if (!is_vm_sos) {
 		ept_pages_info[vm_id].ept.top_address_space = EPT_ADDRESS_SPACE(CONFIG_UOS_RAM_SIZE);
 		ept_pages_info[vm_id].ept.nworld_pml4_base = uos_nworld_pml4_pages[vm_id - 1U];
 		ept_pages_info[vm_id].ept.nworld_pdpt_base = uos_nworld_pdpt_pages[vm_id - 1U];
@@ -175,5 +176,4 @@ void init_ept_mem_ops(struct acrn_vm *vm)
 	vm->arch_vm.ept_mem_ops.get_pdpt_page = ept_get_pdpt_page;
 	vm->arch_vm.ept_mem_ops.get_pd_page = ept_get_pd_page;
 	vm->arch_vm.ept_mem_ops.get_pt_page = ept_get_pt_page;
-
 }
