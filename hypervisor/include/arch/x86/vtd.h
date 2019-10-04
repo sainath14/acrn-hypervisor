@@ -468,8 +468,8 @@ static inline uint16_t dma_frcd_up_sid(uint64_t up_sid)
 	return ((uint16_t)up_sid & 0xffffU);
 }
 
-#define MAX_DRHDS		4
-#define MAX_DRHD_DEVSCOPES	4
+#define MAX_DRHDS		16 /* wolfpass has 8 */
+#define MAX_DRHD_DEVSCOPES	16 /* wolfpass has 10 */
 
 #define DMAR_CONTEXT_TRANSLATION_TYPE_TRANSLATED 0x00U
 #define DMAR_CONTEXT_TRANSLATION_TYPE_RESERVED 0x01U
