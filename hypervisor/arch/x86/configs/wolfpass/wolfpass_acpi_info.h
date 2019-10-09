@@ -1,0 +1,260 @@
+/*
+ * Copyright (C) 2019 Intel Corporation. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/* DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
+ */
+
+#ifndef PLATFORM_ACPI_INFO_H
+#define PLATFORM_ACPI_INFO_H
+
+/*
+ * BIOS Information
+ * Vendor: Intel Corporation
+ * Version: SE5C620.86B.02.01.0008.031920191559
+ * Release Date: 03/19/2019
+ * BIOS Revision: 0.0
+ *
+ * Base Board Information
+ * Manufacturer: Intel Corporation
+ * Product Name: S2600WF0
+ * Version: H87179-853
+ */
+
+/* pm sstate data */
+#define PM1A_EVT_ADDRESS        0x500UL
+#define PM1A_EVT_ACCESS_SIZE    0x2U
+#define PM1A_CNT_ADDRESS        0x504UL
+#undef S5_PKG_RESERVED
+#define S5_PKG_RESERVED         0xaU
+
+#define WAKE_VECTOR_32          0x683E300CUL
+#define WAKE_VECTOR_64          0x683E3018UL
+
+#define RESET_REGISTER_ADDRESS  0xCF9UL
+#define RESET_REGISTER_SPACE_ID SPACE_SYSTEM_IO
+#define RESET_REGISTER_VALUE    0x6U
+
+/* DRHD of DMAR */
+
+#define DRHD_COUNT              8U
+
+#define DRHD0_DEV_CNT           10U
+#define DRHD0_SEGMENT           0U
+#define DRHD0_FLAGS             0U
+#define DRHD0_REG_BASE          0xD37FC000UL
+#define DRHD0_IGNORE            false
+#define DRHD0_DEVSCOPE0_BUS     0x80U
+#define DRHD0_DEVSCOPE0_PATH    0x2cU
+#define DRHD0_DEVSCOPE1_BUS     0x80U
+#define DRHD0_DEVSCOPE1_PATH    0x20U
+#define DRHD0_DEVSCOPE2_BUS     0x80U
+#define DRHD0_DEVSCOPE2_PATH    0x21U
+#define DRHD0_DEVSCOPE3_BUS     0x80U
+#define DRHD0_DEVSCOPE3_PATH    0x22U
+#define DRHD0_DEVSCOPE4_BUS     0x80U
+#define DRHD0_DEVSCOPE4_PATH    0x23U
+#define DRHD0_DEVSCOPE5_BUS     0x80U
+#define DRHD0_DEVSCOPE5_PATH    0x24U
+#define DRHD0_DEVSCOPE6_BUS     0x0U
+#define DRHD0_DEVSCOPE6_PATH    0x0U
+#define DRHD0_DEVSCOPE7_BUS     0x0U
+#define DRHD0_DEVSCOPE7_PATH    0x0U
+#define DRHD0_DEVSCOPE8_BUS     0x0U
+#define DRHD0_DEVSCOPE8_PATH    0x0U
+#define DRHD0_DEVSCOPE9_BUS     0x0U
+#define DRHD0_DEVSCOPE9_PATH    0x0U
+#define DRHD0_IOAPIC_ID         15U
+
+#define DRHD1_DEV_CNT           2U
+#define DRHD1_SEGMENT           0U
+#define DRHD1_FLAGS             0U
+#define DRHD1_REG_BASE          0xE0FFC000UL
+#define DRHD1_IGNORE            false
+#define DRHD1_DEVSCOPE0_BUS     0x0U
+#define DRHD1_DEVSCOPE0_PATH    0x0U
+#define DRHD1_DEVSCOPE1_BUS     0x0U
+#define DRHD1_DEVSCOPE1_PATH    0x0U
+#define DRHD1_DEVSCOPE2_BUS     0x0U
+#define DRHD1_DEVSCOPE2_PATH    0x0U
+#define DRHD1_DEVSCOPE3_BUS     0x0U
+#define DRHD1_DEVSCOPE3_PATH    0x0U
+#define DRHD1_DEVSCOPE4_BUS     0x0U
+#define DRHD1_DEVSCOPE4_PATH    0x0U
+#define DRHD1_DEVSCOPE5_BUS     0x0U
+#define DRHD1_DEVSCOPE5_PATH    0x0U
+#define DRHD1_DEVSCOPE6_BUS     0x0U
+#define DRHD1_DEVSCOPE6_PATH    0x0U
+#define DRHD1_DEVSCOPE7_BUS     0x0U
+#define DRHD1_DEVSCOPE7_PATH    0x0U
+#define DRHD1_DEVSCOPE8_BUS     0x0U
+#define DRHD1_DEVSCOPE8_PATH    0x0U
+#define DRHD1_DEVSCOPE9_BUS     0x0U
+#define DRHD1_DEVSCOPE9_PATH    0x0U
+#define DRHD1_IOAPIC_ID         16U
+
+#define DRHD2_DEV_CNT           1U
+#define DRHD2_SEGMENT           0U
+#define DRHD2_FLAGS             0U
+#define DRHD2_REG_BASE          0xEE7FC000UL
+#define DRHD2_IGNORE            false
+#define DRHD2_DEVSCOPE0_BUS     0x0U
+#define DRHD2_DEVSCOPE0_PATH    0x0U
+#define DRHD2_DEVSCOPE1_BUS     0x0U
+#define DRHD2_DEVSCOPE1_PATH    0x0U
+#define DRHD2_DEVSCOPE2_BUS     0x0U
+#define DRHD2_DEVSCOPE2_PATH    0x0U
+#define DRHD2_DEVSCOPE3_BUS     0x0U
+#define DRHD2_DEVSCOPE3_PATH    0x0U
+#define DRHD2_DEVSCOPE4_BUS     0x0U
+#define DRHD2_DEVSCOPE4_PATH    0x0U
+#define DRHD2_DEVSCOPE5_BUS     0x0U
+#define DRHD2_DEVSCOPE5_PATH    0x0U
+#define DRHD2_DEVSCOPE6_BUS     0x0U
+#define DRHD2_DEVSCOPE6_PATH    0x0U
+#define DRHD2_DEVSCOPE7_BUS     0x0U
+#define DRHD2_DEVSCOPE7_PATH    0x0U
+#define DRHD2_DEVSCOPE8_BUS     0x0U
+#define DRHD2_DEVSCOPE8_PATH    0x0U
+#define DRHD2_DEVSCOPE9_BUS     0x0U
+#define DRHD2_DEVSCOPE9_PATH    0x0U
+#define DRHD2_IOAPIC_ID         17U
+
+#define DRHD3_DEV_CNT           4U
+#define DRHD3_SEGMENT           0U
+#define DRHD3_FLAGS             0U
+#define DRHD3_REG_BASE          0xFBFFC000UL
+#define DRHD3_IGNORE            false
+#define DRHD3_DEVSCOPE0_BUS     0x0U
+#define DRHD3_DEVSCOPE0_PATH    0x0U
+#define DRHD3_DEVSCOPE1_BUS     0x0U
+#define DRHD3_DEVSCOPE1_PATH    0x0U
+#define DRHD3_DEVSCOPE2_BUS     0x0U
+#define DRHD3_DEVSCOPE2_PATH    0x0U
+#define DRHD3_DEVSCOPE3_BUS     0x0U
+#define DRHD3_DEVSCOPE3_PATH    0x0U
+#define DRHD3_DEVSCOPE4_BUS     0x0U
+#define DRHD3_DEVSCOPE4_PATH    0x0U
+#define DRHD3_DEVSCOPE5_BUS     0x0U
+#define DRHD3_DEVSCOPE5_PATH    0x0U
+#define DRHD3_DEVSCOPE6_BUS     0x0U
+#define DRHD3_DEVSCOPE6_PATH    0x0U
+#define DRHD3_DEVSCOPE7_BUS     0x0U
+#define DRHD3_DEVSCOPE7_PATH    0x0U
+#define DRHD3_DEVSCOPE8_BUS     0x0U
+#define DRHD3_DEVSCOPE8_PATH    0x0U
+#define DRHD3_DEVSCOPE9_BUS     0x0U
+#define DRHD3_DEVSCOPE9_PATH    0x0U
+#define DRHD3_IOAPIC_ID         18U
+
+#define DRHD4_DEV_CNT           1U
+#define DRHD4_SEGMENT           0U
+#define DRHD4_FLAGS             0U
+#define DRHD4_REG_BASE          0xAAFFC000UL
+#define DRHD4_IGNORE            false
+#define DRHD4_DEVSCOPE0_BUS     0x0U
+#define DRHD4_DEVSCOPE0_PATH    0x0U
+#define DRHD4_DEVSCOPE1_BUS     0x0U
+#define DRHD4_DEVSCOPE1_PATH    0x0U
+#define DRHD4_DEVSCOPE2_BUS     0x0U
+#define DRHD4_DEVSCOPE2_PATH    0x0U
+#define DRHD4_DEVSCOPE3_BUS     0x0U
+#define DRHD4_DEVSCOPE3_PATH    0x0U
+#define DRHD4_DEVSCOPE4_BUS     0x0U
+#define DRHD4_DEVSCOPE4_PATH    0x0U
+#define DRHD4_DEVSCOPE5_BUS     0x0U
+#define DRHD4_DEVSCOPE5_PATH    0x0U
+#define DRHD4_DEVSCOPE6_BUS     0x0U
+#define DRHD4_DEVSCOPE6_PATH    0x0U
+#define DRHD4_DEVSCOPE7_BUS     0x0U
+#define DRHD4_DEVSCOPE7_PATH    0x0U
+#define DRHD4_DEVSCOPE8_BUS     0x0U
+#define DRHD4_DEVSCOPE8_PATH    0x0U
+#define DRHD4_DEVSCOPE9_BUS     0x0U
+#define DRHD4_DEVSCOPE9_PATH    0x0U
+#define DRHD4_IOAPIC_ID         10U
+
+#define DRHD5_DEV_CNT           2U
+#define DRHD5_SEGMENT           0U
+#define DRHD5_FLAGS             0U
+#define DRHD5_REG_BASE          0xB87FC000UL
+#define DRHD5_IGNORE            false
+#define DRHD5_DEVSCOPE0_BUS     0x0U
+#define DRHD5_DEVSCOPE0_PATH    0x0U
+#define DRHD5_DEVSCOPE1_BUS     0x0U
+#define DRHD5_DEVSCOPE1_PATH    0x0U
+#define DRHD5_DEVSCOPE2_BUS     0x0U
+#define DRHD5_DEVSCOPE2_PATH    0x0U
+#define DRHD5_DEVSCOPE3_BUS     0x0U
+#define DRHD5_DEVSCOPE3_PATH    0x0U
+#define DRHD5_DEVSCOPE4_BUS     0x0U
+#define DRHD5_DEVSCOPE4_PATH    0x0U
+#define DRHD5_DEVSCOPE5_BUS     0x0U
+#define DRHD5_DEVSCOPE5_PATH    0x0U
+#define DRHD5_DEVSCOPE6_BUS     0x0U
+#define DRHD5_DEVSCOPE6_PATH    0x0U
+#define DRHD5_DEVSCOPE7_BUS     0x0U
+#define DRHD5_DEVSCOPE7_PATH    0x0U
+#define DRHD5_DEVSCOPE8_BUS     0x0U
+#define DRHD5_DEVSCOPE8_PATH    0x0U
+#define DRHD5_DEVSCOPE9_BUS     0x0U
+#define DRHD5_DEVSCOPE9_PATH    0x0U
+#define DRHD5_IOAPIC_ID         11U
+
+#define DRHD6_DEV_CNT           3U
+#define DRHD6_SEGMENT           0U
+#define DRHD6_FLAGS             0U
+#define DRHD6_REG_BASE          0xC5FFC000UL
+#define DRHD6_IGNORE            false
+#define DRHD6_DEVSCOPE0_BUS     0x80U
+#define DRHD6_DEVSCOPE0_PATH    0x25U
+#define DRHD6_DEVSCOPE1_BUS     0x80U
+#define DRHD6_DEVSCOPE1_PATH    0x26U
+#define DRHD6_DEVSCOPE2_BUS     0x80U
+#define DRHD6_DEVSCOPE2_PATH    0x27U
+#define DRHD6_DEVSCOPE3_BUS     0x80U
+#define DRHD6_DEVSCOPE3_PATH    0x0U
+#define DRHD6_DEVSCOPE4_BUS     0x85U
+#define DRHD6_DEVSCOPE4_PATH    0x2cU
+#define DRHD6_DEVSCOPE5_BUS     0x85U
+#define DRHD6_DEVSCOPE5_PATH    0x10U
+#define DRHD6_DEVSCOPE6_BUS     0xaeU
+#define DRHD6_DEVSCOPE6_PATH    0x2cU
+#define DRHD6_DEVSCOPE7_BUS     0xd7U
+#define DRHD6_DEVSCOPE7_PATH    0x2cU
+#define DRHD6_DEVSCOPE8_BUS     0xd7U
+#define DRHD6_DEVSCOPE8_PATH    0x0U
+#define DRHD6_DEVSCOPE9_BUS     0xd7U
+#define DRHD6_DEVSCOPE9_PATH    0x8U
+#define DRHD6_IOAPIC_ID         12U
+
+#define DRHD7_DEV_CNT           3U
+#define DRHD7_SEGMENT           0U
+#define DRHD7_FLAGS             1U
+#define DRHD7_REG_BASE          0x9D7FC000UL
+#define DRHD7_IGNORE            false
+#define DRHD7_DEVSCOPE0_BUS     0xd7U
+#define DRHD7_DEVSCOPE0_PATH    0x10U
+#define DRHD7_DEVSCOPE1_BUS     0x17U
+#define DRHD7_DEVSCOPE1_PATH    0x2cU
+#define DRHD7_DEVSCOPE2_BUS     0x3aU
+#define DRHD7_DEVSCOPE2_PATH    0x2cU
+#define DRHD7_DEVSCOPE3_BUS     0x3aU
+#define DRHD7_DEVSCOPE3_PATH    0x0U
+#define DRHD7_DEVSCOPE4_BUS     0x5dU
+#define DRHD7_DEVSCOPE4_PATH    0x2cU
+#define DRHD7_DEVSCOPE5_BUS     0x5dU
+#define DRHD7_DEVSCOPE5_PATH    0x10U
+#define DRHD7_DEVSCOPE6_BUS     0x5dU
+#define DRHD7_DEVSCOPE6_PATH    0x18U
+#define DRHD7_DEVSCOPE7_BUS     0xf0U
+#define DRHD7_DEVSCOPE7_PATH    0xf8U
+#define DRHD7_DEVSCOPE8_BUS     0x0U
+#define DRHD7_DEVSCOPE8_PATH    0x2cU
+#define DRHD7_DEVSCOPE9_BUS     0x0U
+#define DRHD7_DEVSCOPE9_PATH    0xf8U
+#define DRHD7_IOAPIC_ID         9U
+
+#endif /* PLATFORM_ACPI_INFO_H */
