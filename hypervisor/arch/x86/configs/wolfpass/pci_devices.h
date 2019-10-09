@@ -351,9 +351,9 @@
 #define VGA_COMPATIBLE_CONTROLLER_0             .pbdf.bits = {.b = 0x02U, .d = 0x00U, .f = 0x00U}, \
                                                 .vbar_base[0] = 0x91000000UL, \
                                                 .vbar_base[1] = 0x92000000UL
-#define Non_Volatile memory controller          .pbdf.bits = {.b = 0x03U, .d = 0x00U, .f = 0x00U}, \
+#define Non_Volatile_memory_controller_0        .pbdf.bits = {.b = 0x03U, .d = 0x00U, .f = 0x00U}, \
                                                 .vbar_base[0] = 0x92100000UL
-#define Non_Volatile memory controller          .pbdf.bits = {.b = 0x5EU, .d = 0x00U, .f = 0x00U}, \
+#define Non_Volatile_memory_controller_1        .pbdf.bits = {.b = 0x5EU, .d = 0x00U, .f = 0x00U}, \
                                                 .vbar_base[0] = 0xb8800000UL
 #define ETHERNET_CONTROLLER_0                   .pbdf.bits = {.b = 0x3DU, .d = 0x00U, .f = 0x00U}, \
                                                 .vbar_base[0] = 0xac000000UL, \
