@@ -812,7 +812,7 @@ void launch_vms(uint16_t pcpu_id)
 	uint16_t vm_id, bsp_id;
 	struct acrn_vm_config *vm_config;
 
-	for (vm_id = 0U; vm_id < CONFIG_MAX_VM_NUM; vm_id++) {
+	for (vm_id = 0U; vm_id < 1; vm_id++) { /* only want 1 VM */
 		vm_config = get_vm_config(vm_id);
 		if ((vm_config->load_order == SOS_VM) || (vm_config->load_order == PRE_LAUNCHED_VM)) {
 			if (vm_config->load_order == SOS_VM) {
