@@ -34,7 +34,7 @@ struct acrn_vm_config vm_configs[CONFIG_MAX_VM_NUM] = {
 				VM0_CONFIG_OS_BOOTARG_ROOT		\
 \
 				"rw rootwait noxsave nohpet \
-				console=hvc0 no_timer_check ignore_loglevel log_buf_len=16M \
+				console=hvc0 console=ttyS0 no_timer_check ignore_loglevel log_buf_len=16M \
 				consoleblank=0 tsc=reliable xapic_phys "
 		},
 		.vuart[0] = {
