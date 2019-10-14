@@ -42,11 +42,11 @@
  * VM0: one Mass Storage controller, one Network controller;
  * VM1: one Mass Storage controller, one Network controller(if a secondary Network controller class device exist);
  */
-#define VM0_STORAGE_CONTROLLER			SATA_CONTROLLER_0
+#define VM0_STORAGE_CONTROLLER			Non_Volatile_memory_controller_0
 #define VM0_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_0
-#define VM0_CONFIG_PCI_DEV_NUM			3U
+#define VM0_CONFIG_PCI_DEV_NUM			2U /* 3U */
 
-#define VM1_STORAGE_CONTROLLER			USB_CONTROLLER_0
+#define VM1_STORAGE_CONTROLLER			Non_Volatile_memory_controller_1
 #if defined(ETHERNET_CONTROLLER_1)
 /* if a secondary Ethernet controller subclass exist, assign to VM1 */
 #define VM1_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_1
