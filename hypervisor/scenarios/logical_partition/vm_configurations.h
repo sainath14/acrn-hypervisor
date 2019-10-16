@@ -27,8 +27,8 @@
 #define VM0_CONFIG_VCPU_AFFINITY		{AFFINITY_CPU(0U), AFFINITY_CPU(1U)}
 #define VM0_CONFIG_MEM_START_HPA		0x100000000UL
 #define VM0_CONFIG_MEM_SIZE			0x20000000UL
-#define VM0_CONFIG_OS_BOOTARG_ROOT		"root=/dev/nvme1n1p2 "
-#define VM0_CONFIG_OS_BOOTARG_MAXCPUS		"maxcpus=4 "
+#define VM0_CONFIG_OS_BOOTARG_ROOT		"root=PARTUUID=d71c6664-c431-437b-839f-50a6b8409f7a "
+#define VM0_CONFIG_OS_BOOTARG_MAXCPUS		"maxcpus=1 "
 #define VM0_CONFIG_OS_BOOTARG_CONSOLE		"console=/dev/ttyS0 "
 
 #define VM1_CONFIG_VCPU_AFFINITY		{AFFINITY_CPU(2U), AFFINITY_CPU(3U)}
@@ -42,14 +42,14 @@
  * VM0: one Mass Storage controller, one Network controller;
  * VM1: one Mass Storage controller, one Network controller(if a secondary Network controller class device exist);
  */
-#define VM0_STORAGE_CONTROLLER			Non_Volatile_memory_controller_0
-#define VM0_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_0
+#define VM0_STORAGE_CONTROLLER			Non_Volatile_memory_controller_1
+#define VM0_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_1
 #define VM0_CONFIG_PCI_DEV_NUM			2U /* 3U */
 
-#define VM1_STORAGE_CONTROLLER			Non_Volatile_memory_controller_1
+#define VM1_STORAGE_CONTROLLER			Non_Volatile_memory_controller_0
 #if defined(ETHERNET_CONTROLLER_1)
 /* if a secondary Ethernet controller subclass exist, assign to VM1 */
-#define VM1_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_1
+#define VM1_NETWORK_CONTROLLER			ETHERNET_CONTROLLER_0
 #elif defined(NETWORK_CONTROLLER_0)
 /* if a Network controller subclass exist(usually it is a wireless network card), assign to VM1 */
 #define VM1_NETWORK_CONTROLLER			NETWORK_CONTROLLER_0
