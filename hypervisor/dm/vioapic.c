@@ -498,13 +498,10 @@ vioapic_pincount(const struct acrn_vm *vm)
  */
 int32_t vioapic_mmio_access_handler(struct io_request *io_req, void *handler_private_data)
 {
-	struct acrn_vm *vm = (struct acrn_vm *)handler_private_data;
-	struct acrn_vioapic *vioapic;
+	struct acrn_vioapic *vioapic = (struct acrn_vioapic *)handler_private_data;
 	struct mmio_request *mmio = &io_req->reqs.mmio;
 	uint64_t gpa = mmio->address;
 	int32_t ret = 0;
-
-	vioapic = vm_ioapic(vm);
 
 	/* Note all RW to IOAPIC are 32-Bit in size */
 	if (mmio->size == 4UL) {
