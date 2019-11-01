@@ -205,6 +205,9 @@ struct pci_msix_cap {
 };
 
 struct pci_pdev {
+	/* IOMMU translating DMA operations of this device */
+	uint32_t drhd_idx;
+
 	/* The bar info of the physical PCI device. */
 	uint32_t nr_bars; /* 6 for normal device, 2 for bridge, 1 for cardbus */
 
@@ -284,6 +287,7 @@ void pci_pdev_write_cfg(union pci_bdf bdf, uint32_t offset, uint32_t bytes, uint
 void enable_disable_pci_intx(union pci_bdf bdf, bool enable);
 
 void init_pci_pdev_list(void);
+uint32_t pci_lookup_drhd_for_pbdf(uint16_t pbdf);
 
 static inline bool pci_vendor_is_valid(uint32_t vendor_id)
 {
