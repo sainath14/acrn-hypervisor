@@ -645,6 +645,15 @@ void resume_iommu(void);
 int32_t init_iommu(void);
 
 /**
+ * @brief Invoke action over each IOMMU.
+ *
+ * Iterate over DRHD structures, invoking action routine on each. Stop early
+ * when action routine returns false. Return immediately if action routine is
+ * NULL.
+ */
+void iommu_do_for_each(bool (*action)(struct dmar_drhd *, void *), void *data);
+
+/**
  * @brief check the iommu if support cache snoop.
  *
  * @param[in] iommu pointer to iommu domain to check

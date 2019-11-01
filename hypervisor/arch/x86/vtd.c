@@ -1225,7 +1225,7 @@ static int32_t remove_iommu_device(const struct iommu_domain *domain, uint16_t s
  * @pre action != NULL
  * As an internal API, VT-d code can guarantee action is not NULL.
  */
-static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
+void __do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 {
 	struct dmar_drhd_rt *dmar_unit;
 	uint32_t i;
@@ -1238,6 +1238,22 @@ static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 			dev_dbg(ACRN_DBG_IOMMU, "ignore dmar_unit @0x%x", dmar_unit->drhd->reg_base_addr);
 		}
 	}
+}
+
+/* Public API access to DRHD structures
+ * Note, the parameter here is a public structure; the sibling method above
+ * passes in an internal drhd structure unavailable to the public.
+ * We stop iterating when action returns false.
+ */
+void iommu_do_for_each(bool (*action)(struct dmar_drhd *, void *), void *data)
+{
+	uint32_t i;
+	if (!action)
+		return;
+	for (i = 0U; i < platform_dmar_info->drhd_count; i++)
+		if (!dmar_drhd_units[i].drhd->ignore)
+			if (!action(dmar_drhd_units[i].drhd, data))
+				break;
 }
 
 struct iommu_domain *create_iommu_domain(uint16_t vm_id, uint64_t translation_table, uint32_t addr_width)
@@ -1314,17 +1330,17 @@ int32_t move_pt_device(const struct iommu_domain *from_domain, struct iommu_doma
 
 void enable_iommu(void)
 {
-	do_action_for_iommus(dmar_enable);
+	__do_action_for_iommus(dmar_enable);
 }
 
 void suspend_iommu(void)
 {
-	do_action_for_iommus(dmar_suspend);
+	__do_action_for_iommus(dmar_suspend);
 }
 
 void resume_iommu(void)
 {
-	do_action_for_iommus(dmar_resume);
+	__do_action_for_iommus(dmar_resume);
 }
 
 int32_t init_iommu(void)
@@ -1343,7 +1359,7 @@ int32_t init_iommu(void)
 	} else {
 		ret = register_hrhd_units();
 		if (ret == 0) {
-			do_action_for_iommus(dmar_prepare);
+			__do_action_for_iommus(dmar_prepare);
 		}
 	}
 	return ret;
