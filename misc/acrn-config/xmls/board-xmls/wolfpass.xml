@@ -1,0 +1,987 @@
+<acrn-config board="wolfpass">
+	<BIOS_INFO>
+	BIOS Information
+	Vendor: Intel Corporation
+	Version: SE5C620.86B.02.01.0008.031920191559
+	Release Date: 03/19/2019
+	BIOS Revision: 0.0
+	</BIOS_INFO>
+
+	<BASE_BOARD_INFO>
+	Base Board Information
+	Manufacturer: Intel Corporation
+	Product Name: S2600WF0
+	Version: H87179-853
+	</BASE_BOARD_INFO>
+
+	<PCI_DEVICE>
+	00:00.0 Host bridge: Intel Corporation Sky Lake-E DMI3 Registers (rev 04)
+	00:04.0 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff2c000 (64-bit, non-prefetchable) [size=16K]
+	00:04.1 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff28000 (64-bit, non-prefetchable) [size=16K]
+	00:04.2 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff24000 (64-bit, non-prefetchable) [size=16K]
+	00:04.3 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff20000 (64-bit, non-prefetchable) [size=16K]
+	00:04.4 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff1c000 (64-bit, non-prefetchable) [size=16K]
+	00:04.5 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff18000 (64-bit, non-prefetchable) [size=16K]
+	00:04.6 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff14000 (64-bit, non-prefetchable) [size=16K]
+	00:04.7 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 383ffff10000 (64-bit, non-prefetchable) [size=16K]
+	00:05.0 System peripheral: Intel Corporation Sky Lake-E MM/Vt-d Configuration Registers (rev 04)
+	00:05.2 System peripheral: Intel Corporation Device 2025 (rev 04)
+	00:05.4 PIC: Intel Corporation Device 2026 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at 9230a000 (32-bit, non-prefetchable) [size=4K]
+	00:08.0 System peripheral: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	00:08.1 Performance counters: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	00:08.2 System peripheral: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	00:11.0 Unassigned class [ff00]: Intel Corporation C620 Series Chipset Family MROM 0 (rev 09)
+	00:11.1 Unassigned class [ff00]: Intel Corporation C620 Series Chipset Family MROM 1 (rev 09)
+	00:11.5 SATA controller: Intel Corporation C620 Series Chipset Family SSATA Controller [AHCI mode] (rev 09)
+	Region 0: Memory at 92306000 (32-bit, non-prefetchable) [size=8K]
+	Region 1: Memory at 92309000 (32-bit, non-prefetchable) [size=256]
+	Region 5: Memory at 92280000 (32-bit, non-prefetchable) [size=512K]
+	00:14.0 USB controller: Intel Corporation C620 Series Chipset Family USB 3.0 xHCI Controller (rev 09)
+	Region 0: Memory at 383ffff00000 (64-bit, non-prefetchable) [size=64K]
+	00:14.2 Signal processing controller: Intel Corporation C620 Series Chipset Family Thermal Subsystem (rev 09)
+	Region 0: Memory at 383ffff34000 (64-bit, non-prefetchable) [size=4K]
+	00:16.0 Communication controller: Intel Corporation C620 Series Chipset Family MEI Controller #1 (rev 09)
+	Region 0: Memory at 383ffff33000 (64-bit, non-prefetchable) [size=4K]
+	00:16.1 Communication controller: Intel Corporation C620 Series Chipset Family MEI Controller #2 (rev 09)
+	Region 0: Memory at 383ffff32000 (64-bit, non-prefetchable) [size=4K]
+	00:16.4 Communication controller: Intel Corporation C620 Series Chipset Family MEI Controller #3 (rev 09)
+	Region 0: Memory at 383ffff31000 (64-bit, non-prefetchable) [size=4K]
+	00:17.0 SATA controller: Intel Corporation C620 Series Chipset Family SATA Controller [AHCI mode] (rev 09)
+	Region 0: Memory at 92304000 (32-bit, non-prefetchable) [size=8K]
+	Region 1: Memory at 92308000 (32-bit, non-prefetchable) [size=256]
+	Region 5: Memory at 92200000 (32-bit, non-prefetchable) [size=512K]
+	00:1c.0 PCI bridge: Intel Corporation C620 Series Chipset Family PCI Express Root Port #4 (rev f9)
+	00:1d.0 PCI bridge: Intel Corporation C620 Series Chipset Family PCI Express Root Port #9 (rev f9)
+	00:1f.0 ISA bridge: Intel Corporation C624 Series Chipset LPC/eSPI Controller (rev 09)
+	00:1f.2 Memory controller: Intel Corporation C620 Series Chipset Family Power Management Controller (rev 09)
+	Region 0: Memory at 92300000 (32-bit, non-prefetchable) [size=16K]
+	00:1f.4 SMBus: Intel Corporation C620 Series Chipset Family SMBus (rev 09)
+	Region 0: Memory at 383ffff30000 (64-bit, non-prefetchable) [size=256]
+	00:1f.5 Serial bus controller [0c80]: Intel Corporation C620 Series Chipset Family SPI Controller (rev 09)
+	Region 0: Memory at fe010000 (32-bit, non-prefetchable) [size=4K]
+	01:00.0 PCI bridge: ASPEED Technology, Inc. AST1150 PCI-to-PCI Bridge (rev 04)
+	02:00.0 VGA compatible controller: ASPEED Technology, Inc. ASPEED Graphics Family (rev 41)
+	Region 0: Memory at 91000000 (32-bit, non-prefetchable) [size=16M]
+	Region 1: Memory at 92000000 (32-bit, non-prefetchable) [size=128K]
+	03:00.0 Non-Volatile memory controller: Samsung Electronics Co Ltd NVMe SSD Controller SM961/PM961
+	Region 0: Memory at 92100000 (64-bit, non-prefetchable) [size=16K]
+	17:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	17:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	17:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at 9d800000 (32-bit, non-prefetchable) [size=4K]
+	17:08.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:08.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:09.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0a.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0b.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0b.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0b.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0b.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0e.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:0f.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:10.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:11.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:11.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:11.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:11.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:1d.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:1d.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:1d.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:1d.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	17:1e.0 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.1 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.2 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.3 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.4 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.5 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	17:1e.6 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	3a:00.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port A (rev 04)
+	3a:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	3a:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	3a:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at ac600000 (32-bit, non-prefetchable) [size=4K]
+	3a:08.0 System peripheral: Intel Corporation Device 2066 (rev 04)
+	3a:09.0 System peripheral: Intel Corporation Device 2066 (rev 04)
+	3a:0a.0 System peripheral: Intel Corporation Device 2040 (rev 04)
+	3a:0a.1 System peripheral: Intel Corporation Device 2041 (rev 04)
+	3a:0a.2 System peripheral: Intel Corporation Device 2042 (rev 04)
+	3a:0a.3 System peripheral: Intel Corporation Device 2043 (rev 04)
+	3a:0a.4 System peripheral: Intel Corporation Device 2044 (rev 04)
+	3a:0a.5 System peripheral: Intel Corporation Device 2045 (rev 04)
+	3a:0a.6 System peripheral: Intel Corporation Device 2046 (rev 04)
+	3a:0a.7 System peripheral: Intel Corporation Device 2047 (rev 04)
+	3a:0b.0 System peripheral: Intel Corporation Device 2048 (rev 04)
+	3a:0b.1 System peripheral: Intel Corporation Device 2049 (rev 04)
+	3a:0b.2 System peripheral: Intel Corporation Device 204a (rev 04)
+	3a:0b.3 System peripheral: Intel Corporation Device 204b (rev 04)
+	3a:0c.0 System peripheral: Intel Corporation Device 2040 (rev 04)
+	3a:0c.1 System peripheral: Intel Corporation Device 2041 (rev 04)
+	3a:0c.2 System peripheral: Intel Corporation Device 2042 (rev 04)
+	3a:0c.3 System peripheral: Intel Corporation Device 2043 (rev 04)
+	3a:0c.4 System peripheral: Intel Corporation Device 2044 (rev 04)
+	3a:0c.5 System peripheral: Intel Corporation Device 2045 (rev 04)
+	3a:0c.6 System peripheral: Intel Corporation Device 2046 (rev 04)
+	3a:0c.7 System peripheral: Intel Corporation Device 2047 (rev 04)
+	3a:0d.0 System peripheral: Intel Corporation Device 2048 (rev 04)
+	3a:0d.1 System peripheral: Intel Corporation Device 2049 (rev 04)
+	3a:0d.2 System peripheral: Intel Corporation Device 204a (rev 04)
+	3a:0d.3 System peripheral: Intel Corporation Device 204b (rev 04)
+	3b:00.0 PCI bridge: Intel Corporation Device 37c0 (rev 09)
+	Region 0: Memory at ac500000 (64-bit, non-prefetchable) [size=128K]
+	3c:03.0 PCI bridge: Intel Corporation Device 37c5 (rev 09)
+	3d:00.0 Ethernet controller: Intel Corporation Device 37cc (rev 09)
+	Region 0: Memory at ab000000 (64-bit, prefetchable) [size=16M]
+	Region 3: Memory at ac400000 (64-bit, prefetchable) [size=32K]
+	Region 0: Memory at 00000000ac000000 (64-bit, prefetchable)
+	Region 3: Memory at 00000000ac408000 (64-bit, prefetchable)
+	5d:02.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port C (rev 04)
+	5d:03.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port D (rev 04)
+	5d:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	5d:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	5d:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at b8900000 (32-bit, non-prefetchable) [size=4K]
+	5d:0e.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	5d:0e.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	5d:0f.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	5d:0f.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	5d:10.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	5d:10.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	5d:12.0 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	5d:12.1 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	5d:12.2 System peripheral: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	5d:12.4 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	5d:12.5 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	5d:15.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	5d:16.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	5d:16.4 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	5d:17.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	5e:00.0 Non-Volatile memory controller: Intel Corporation Express Flash NVMe P4500/P4600
+	Region 0: Memory at b8800000 (64-bit, non-prefetchable) [size=16K]
+	80:00.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port A (rev 04)
+	80:04.0 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff1c000 (64-bit, non-prefetchable) [size=16K]
+	80:04.1 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff18000 (64-bit, non-prefetchable) [size=16K]
+	80:04.2 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff14000 (64-bit, non-prefetchable) [size=16K]
+	80:04.3 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff10000 (64-bit, non-prefetchable) [size=16K]
+	80:04.4 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff0c000 (64-bit, non-prefetchable) [size=16K]
+	80:04.5 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff08000 (64-bit, non-prefetchable) [size=16K]
+	80:04.6 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff04000 (64-bit, non-prefetchable) [size=16K]
+	80:04.7 System peripheral: Intel Corporation Sky Lake-E CBDMA Registers (rev 04)
+	Region 0: Memory at 393ffff00000 (64-bit, non-prefetchable) [size=16K]
+	80:05.0 System peripheral: Intel Corporation Sky Lake-E MM/Vt-d Configuration Registers (rev 04)
+	80:05.2 System peripheral: Intel Corporation Device 2025 (rev 04)
+	80:05.4 PIC: Intel Corporation Device 2026 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at c6200000 (32-bit, non-prefetchable) [size=4K]
+	80:08.0 System peripheral: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	80:08.1 Performance counters: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	80:08.2 System peripheral: Intel Corporation Sky Lake-E Ubox Registers (rev 04)
+	81:00.0 Ethernet controller: Intel Corporation I210 Gigabit Network Connection (rev 03)
+	Region 0: Memory at c6000000 (32-bit, non-prefetchable) [size=1M]
+	Region 3: Memory at c6100000 (32-bit, non-prefetchable) [size=16K]
+	85:02.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port C (rev 04)
+	85:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	85:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	85:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at d3d00000 (32-bit, non-prefetchable) [size=4K]
+	85:08.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:08.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:09.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0a.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0b.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0b.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0b.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0b.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0e.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:0f.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.4 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.5 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.6 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:10.7 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:11.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:11.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:11.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:11.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:1d.0 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:1d.1 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:1d.2 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:1d.3 System peripheral: Intel Corporation Sky Lake-E CHA Registers (rev 04)
+	85:1e.0 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.1 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.2 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.3 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.4 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.5 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	85:1e.6 System peripheral: Intel Corporation Sky Lake-E PCU Registers (rev 04)
+	86:00.0 Serial controller: Oxford Semiconductor Ltd OXPCIe952 Dual 16C950 UART
+	Region 0: Memory at d3c00000 (32-bit, non-prefetchable) [size=16K]
+	Region 1: Memory at d3a00000 (32-bit, non-prefetchable) [size=2M]
+	Region 2: Memory at d3800000 (32-bit, non-prefetchable) [size=2M]
+	ae:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	ae:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	ae:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at e1000000 (32-bit, non-prefetchable) [size=4K]
+	ae:08.0 System peripheral: Intel Corporation Device 2066 (rev 04)
+	ae:09.0 System peripheral: Intel Corporation Device 2066 (rev 04)
+	ae:0a.0 System peripheral: Intel Corporation Device 2040 (rev 04)
+	ae:0a.1 System peripheral: Intel Corporation Device 2041 (rev 04)
+	ae:0a.2 System peripheral: Intel Corporation Device 2042 (rev 04)
+	ae:0a.3 System peripheral: Intel Corporation Device 2043 (rev 04)
+	ae:0a.4 System peripheral: Intel Corporation Device 2044 (rev 04)
+	ae:0a.5 System peripheral: Intel Corporation Device 2045 (rev 04)
+	ae:0a.6 System peripheral: Intel Corporation Device 2046 (rev 04)
+	ae:0a.7 System peripheral: Intel Corporation Device 2047 (rev 04)
+	ae:0b.0 System peripheral: Intel Corporation Device 2048 (rev 04)
+	ae:0b.1 System peripheral: Intel Corporation Device 2049 (rev 04)
+	ae:0b.2 System peripheral: Intel Corporation Device 204a (rev 04)
+	ae:0b.3 System peripheral: Intel Corporation Device 204b (rev 04)
+	ae:0c.0 System peripheral: Intel Corporation Device 2040 (rev 04)
+	ae:0c.1 System peripheral: Intel Corporation Device 2041 (rev 04)
+	ae:0c.2 System peripheral: Intel Corporation Device 2042 (rev 04)
+	ae:0c.3 System peripheral: Intel Corporation Device 2043 (rev 04)
+	ae:0c.4 System peripheral: Intel Corporation Device 2044 (rev 04)
+	ae:0c.5 System peripheral: Intel Corporation Device 2045 (rev 04)
+	ae:0c.6 System peripheral: Intel Corporation Device 2046 (rev 04)
+	ae:0c.7 System peripheral: Intel Corporation Device 2047 (rev 04)
+	ae:0d.0 System peripheral: Intel Corporation Device 2048 (rev 04)
+	ae:0d.1 System peripheral: Intel Corporation Device 2049 (rev 04)
+	ae:0d.2 System peripheral: Intel Corporation Device 204a (rev 04)
+	ae:0d.3 System peripheral: Intel Corporation Device 204b (rev 04)
+	d7:00.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port A (rev 04)
+	d7:01.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port B (rev 04)
+	d7:02.0 PCI bridge: Intel Corporation Sky Lake-E PCI Express Root Port C (rev 04)
+	d7:05.0 System peripheral: Intel Corporation Device 2034 (rev 04)
+	d7:05.2 System peripheral: Intel Corporation Sky Lake-E RAS Configuration Registers (rev 04)
+	d7:05.4 PIC: Intel Corporation Device 2036 (rev 04) (prog-if 20 [IO
+	Region 0: Memory at ef500000 (32-bit, non-prefetchable) [size=4K]
+	d7:0e.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	d7:0e.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	d7:0f.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	d7:0f.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	d7:10.0 Performance counters: Intel Corporation Device 2058 (rev 04)
+	d7:10.1 System peripheral: Intel Corporation Device 2059 (rev 04)
+	d7:12.0 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	d7:12.1 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	d7:12.2 System peripheral: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	d7:12.4 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	d7:12.5 Performance counters: Intel Corporation Sky Lake-E M3KTI Registers (rev 04)
+	d7:15.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	d7:16.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	d7:16.4 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	d7:17.0 System peripheral: Intel Corporation Sky Lake-E M2PCI Registers (rev 04)
+	da:00.0 Ethernet controller: Intel Corporation Ethernet Controller 10G X550T (rev 01)
+	Region 0: Memory at eec00000 (64-bit, prefetchable) [size=4M]
+	Region 4: Memory at ef004000 (64-bit, prefetchable) [size=16K]
+	Region 0: Memory at 00000000ef300000 (64-bit, non-prefetchable)
+	Region 3: Memory at 00000000ef400000 (64-bit, non-prefetchable)
+	da:00.1 Ethernet controller: Intel Corporation Ethernet Controller 10G X550T (rev 01)
+	Region 0: Memory at ee800000 (64-bit, prefetchable) [size=4M]
+	Region 4: Memory at ef000000 (64-bit, prefetchable) [size=16K]
+	Region 0: Memory at 00000000ef100000 (64-bit, non-prefetchable)
+	Region 3: Memory at 00000000ef200000 (64-bit, non-prefetchable)
+	</PCI_DEVICE>
+
+	<PCI_VID_PID>
+	00:00.0 0600: 8086:2020 (rev 04)
+	00:04.0 0880: 8086:2021 (rev 04)
+	00:04.1 0880: 8086:2021 (rev 04)
+	00:04.2 0880: 8086:2021 (rev 04)
+	00:04.3 0880: 8086:2021 (rev 04)
+	00:04.4 0880: 8086:2021 (rev 04)
+	00:04.5 0880: 8086:2021 (rev 04)
+	00:04.6 0880: 8086:2021 (rev 04)
+	00:04.7 0880: 8086:2021 (rev 04)
+	00:05.0 0880: 8086:2024 (rev 04)
+	00:05.2 0880: 8086:2025 (rev 04)
+	00:05.4 0800: 8086:2026 (rev 04)
+	00:08.0 0880: 8086:2014 (rev 04)
+	00:08.1 1101: 8086:2015 (rev 04)
+	00:08.2 0880: 8086:2016 (rev 04)
+	00:11.0 ff00: 8086:a1ec (rev 09)
+	00:11.1 ff00: 8086:a1ed (rev 09)
+	00:11.5 0106: 8086:a1d2 (rev 09)
+	00:14.0 0c03: 8086:a1af (rev 09)
+	00:14.2 1180: 8086:a1b1 (rev 09)
+	00:16.0 0780: 8086:a1ba (rev 09)
+	00:16.1 0780: 8086:a1bb (rev 09)
+	00:16.4 0780: 8086:a1be (rev 09)
+	00:17.0 0106: 8086:a182 (rev 09)
+	00:1c.0 0604: 8086:a193 (rev f9)
+	00:1d.0 0604: 8086:a198 (rev f9)
+	00:1f.0 0601: 8086:a1c3 (rev 09)
+	00:1f.2 0580: 8086:a1a1 (rev 09)
+	00:1f.4 0c05: 8086:a1a3 (rev 09)
+	00:1f.5 0c80: 8086:a1a4 (rev 09)
+	01:00.0 0604: 1a03:1150 (rev 04)
+	02:00.0 0300: 1a03:2000 (rev 41)
+	03:00.0 0108: 144d:a804
+	17:05.0 0880: 8086:2034 (rev 04)
+	17:05.2 0880: 8086:2035 (rev 04)
+	17:05.4 0800: 8086:2036 (rev 04)
+	17:08.0 0880: 8086:208d (rev 04)
+	17:08.1 0880: 8086:208d (rev 04)
+	17:08.2 0880: 8086:208d (rev 04)
+	17:08.3 0880: 8086:208d (rev 04)
+	17:08.4 0880: 8086:208d (rev 04)
+	17:08.5 0880: 8086:208d (rev 04)
+	17:08.6 0880: 8086:208d (rev 04)
+	17:08.7 0880: 8086:208d (rev 04)
+	17:09.0 0880: 8086:208d (rev 04)
+	17:09.1 0880: 8086:208d (rev 04)
+	17:09.2 0880: 8086:208d (rev 04)
+	17:09.3 0880: 8086:208d (rev 04)
+	17:09.4 0880: 8086:208d (rev 04)
+	17:09.5 0880: 8086:208d (rev 04)
+	17:09.6 0880: 8086:208d (rev 04)
+	17:09.7 0880: 8086:208d (rev 04)
+	17:0a.0 0880: 8086:208d (rev 04)
+	17:0a.1 0880: 8086:208d (rev 04)
+	17:0a.2 0880: 8086:208d (rev 04)
+	17:0a.3 0880: 8086:208d (rev 04)
+	17:0a.4 0880: 8086:208d (rev 04)
+	17:0a.5 0880: 8086:208d (rev 04)
+	17:0a.6 0880: 8086:208d (rev 04)
+	17:0a.7 0880: 8086:208d (rev 04)
+	17:0b.0 0880: 8086:208d (rev 04)
+	17:0b.1 0880: 8086:208d (rev 04)
+	17:0b.2 0880: 8086:208d (rev 04)
+	17:0b.3 0880: 8086:208d (rev 04)
+	17:0e.0 0880: 8086:208e (rev 04)
+	17:0e.1 0880: 8086:208e (rev 04)
+	17:0e.2 0880: 8086:208e (rev 04)
+	17:0e.3 0880: 8086:208e (rev 04)
+	17:0e.4 0880: 8086:208e (rev 04)
+	17:0e.5 0880: 8086:208e (rev 04)
+	17:0e.6 0880: 8086:208e (rev 04)
+	17:0e.7 0880: 8086:208e (rev 04)
+	17:0f.0 0880: 8086:208e (rev 04)
+	17:0f.1 0880: 8086:208e (rev 04)
+	17:0f.2 0880: 8086:208e (rev 04)
+	17:0f.3 0880: 8086:208e (rev 04)
+	17:0f.4 0880: 8086:208e (rev 04)
+	17:0f.5 0880: 8086:208e (rev 04)
+	17:0f.6 0880: 8086:208e (rev 04)
+	17:0f.7 0880: 8086:208e (rev 04)
+	17:10.0 0880: 8086:208e (rev 04)
+	17:10.1 0880: 8086:208e (rev 04)
+	17:10.2 0880: 8086:208e (rev 04)
+	17:10.3 0880: 8086:208e (rev 04)
+	17:10.4 0880: 8086:208e (rev 04)
+	17:10.5 0880: 8086:208e (rev 04)
+	17:10.6 0880: 8086:208e (rev 04)
+	17:10.7 0880: 8086:208e (rev 04)
+	17:11.0 0880: 8086:208e (rev 04)
+	17:11.1 0880: 8086:208e (rev 04)
+	17:11.2 0880: 8086:208e (rev 04)
+	17:11.3 0880: 8086:208e (rev 04)
+	17:1d.0 0880: 8086:2054 (rev 04)
+	17:1d.1 0880: 8086:2055 (rev 04)
+	17:1d.2 0880: 8086:2056 (rev 04)
+	17:1d.3 0880: 8086:2057 (rev 04)
+	17:1e.0 0880: 8086:2080 (rev 04)
+	17:1e.1 0880: 8086:2081 (rev 04)
+	17:1e.2 0880: 8086:2082 (rev 04)
+	17:1e.3 0880: 8086:2083 (rev 04)
+	17:1e.4 0880: 8086:2084 (rev 04)
+	17:1e.5 0880: 8086:2085 (rev 04)
+	17:1e.6 0880: 8086:2086 (rev 04)
+	3a:00.0 0604: 8086:2030 (rev 04)
+	3a:05.0 0880: 8086:2034 (rev 04)
+	3a:05.2 0880: 8086:2035 (rev 04)
+	3a:05.4 0800: 8086:2036 (rev 04)
+	3a:08.0 0880: 8086:2066 (rev 04)
+	3a:09.0 0880: 8086:2066 (rev 04)
+	3a:0a.0 0880: 8086:2040 (rev 04)
+	3a:0a.1 0880: 8086:2041 (rev 04)
+	3a:0a.2 0880: 8086:2042 (rev 04)
+	3a:0a.3 0880: 8086:2043 (rev 04)
+	3a:0a.4 0880: 8086:2044 (rev 04)
+	3a:0a.5 0880: 8086:2045 (rev 04)
+	3a:0a.6 0880: 8086:2046 (rev 04)
+	3a:0a.7 0880: 8086:2047 (rev 04)
+	3a:0b.0 0880: 8086:2048 (rev 04)
+	3a:0b.1 0880: 8086:2049 (rev 04)
+	3a:0b.2 0880: 8086:204a (rev 04)
+	3a:0b.3 0880: 8086:204b (rev 04)
+	3a:0c.0 0880: 8086:2040 (rev 04)
+	3a:0c.1 0880: 8086:2041 (rev 04)
+	3a:0c.2 0880: 8086:2042 (rev 04)
+	3a:0c.3 0880: 8086:2043 (rev 04)
+	3a:0c.4 0880: 8086:2044 (rev 04)
+	3a:0c.5 0880: 8086:2045 (rev 04)
+	3a:0c.6 0880: 8086:2046 (rev 04)
+	3a:0c.7 0880: 8086:2047 (rev 04)
+	3a:0d.0 0880: 8086:2048 (rev 04)
+	3a:0d.1 0880: 8086:2049 (rev 04)
+	3a:0d.2 0880: 8086:204a (rev 04)
+	3a:0d.3 0880: 8086:204b (rev 04)
+	3b:00.0 0604: 8086:37c0 (rev 09)
+	3c:03.0 0604: 8086:37c5 (rev 09)
+	3d:00.0 0200: 8086:37cc (rev 09)
+	5d:02.0 0604: 8086:2032 (rev 04)
+	5d:03.0 0604: 8086:2033 (rev 04)
+	5d:05.0 0880: 8086:2034 (rev 04)
+	5d:05.2 0880: 8086:2035 (rev 04)
+	5d:05.4 0800: 8086:2036 (rev 04)
+	5d:0e.0 1101: 8086:2058 (rev 04)
+	5d:0e.1 0880: 8086:2059 (rev 04)
+	5d:0f.0 1101: 8086:2058 (rev 04)
+	5d:0f.1 0880: 8086:2059 (rev 04)
+	5d:10.0 1101: 8086:2058 (rev 04)
+	5d:10.1 0880: 8086:2059 (rev 04)
+	5d:12.0 1101: 8086:204c (rev 04)
+	5d:12.1 1101: 8086:204d (rev 04)
+	5d:12.2 0880: 8086:204e (rev 04)
+	5d:12.4 1101: 8086:204c (rev 04)
+	5d:12.5 1101: 8086:204d (rev 04)
+	5d:15.0 0880: 8086:2018 (rev 04)
+	5d:16.0 0880: 8086:2018 (rev 04)
+	5d:16.4 0880: 8086:2018 (rev 04)
+	5d:17.0 0880: 8086:2018 (rev 04)
+	5e:00.0 0108: 8086:0a54
+	80:00.0 0604: 8086:2030 (rev 04)
+	80:04.0 0880: 8086:2021 (rev 04)
+	80:04.1 0880: 8086:2021 (rev 04)
+	80:04.2 0880: 8086:2021 (rev 04)
+	80:04.3 0880: 8086:2021 (rev 04)
+	80:04.4 0880: 8086:2021 (rev 04)
+	80:04.5 0880: 8086:2021 (rev 04)
+	80:04.6 0880: 8086:2021 (rev 04)
+	80:04.7 0880: 8086:2021 (rev 04)
+	80:05.0 0880: 8086:2024 (rev 04)
+	80:05.2 0880: 8086:2025 (rev 04)
+	80:05.4 0800: 8086:2026 (rev 04)
+	80:08.0 0880: 8086:2014 (rev 04)
+	80:08.1 1101: 8086:2015 (rev 04)
+	80:08.2 0880: 8086:2016 (rev 04)
+	81:00.0 0200: 8086:1533 (rev 03)
+	85:02.0 0604: 8086:2032 (rev 04)
+	85:05.0 0880: 8086:2034 (rev 04)
+	85:05.2 0880: 8086:2035 (rev 04)
+	85:05.4 0800: 8086:2036 (rev 04)
+	85:08.0 0880: 8086:208d (rev 04)
+	85:08.1 0880: 8086:208d (rev 04)
+	85:08.2 0880: 8086:208d (rev 04)
+	85:08.3 0880: 8086:208d (rev 04)
+	85:08.4 0880: 8086:208d (rev 04)
+	85:08.5 0880: 8086:208d (rev 04)
+	85:08.6 0880: 8086:208d (rev 04)
+	85:08.7 0880: 8086:208d (rev 04)
+	85:09.0 0880: 8086:208d (rev 04)
+	85:09.1 0880: 8086:208d (rev 04)
+	85:09.2 0880: 8086:208d (rev 04)
+	85:09.3 0880: 8086:208d (rev 04)
+	85:09.4 0880: 8086:208d (rev 04)
+	85:09.5 0880: 8086:208d (rev 04)
+	85:09.6 0880: 8086:208d (rev 04)
+	85:09.7 0880: 8086:208d (rev 04)
+	85:0a.0 0880: 8086:208d (rev 04)
+	85:0a.1 0880: 8086:208d (rev 04)
+	85:0a.2 0880: 8086:208d (rev 04)
+	85:0a.3 0880: 8086:208d (rev 04)
+	85:0a.4 0880: 8086:208d (rev 04)
+	85:0a.5 0880: 8086:208d (rev 04)
+	85:0a.6 0880: 8086:208d (rev 04)
+	85:0a.7 0880: 8086:208d (rev 04)
+	85:0b.0 0880: 8086:208d (rev 04)
+	85:0b.1 0880: 8086:208d (rev 04)
+	85:0b.2 0880: 8086:208d (rev 04)
+	85:0b.3 0880: 8086:208d (rev 04)
+	85:0e.0 0880: 8086:208e (rev 04)
+	85:0e.1 0880: 8086:208e (rev 04)
+	85:0e.2 0880: 8086:208e (rev 04)
+	85:0e.3 0880: 8086:208e (rev 04)
+	85:0e.4 0880: 8086:208e (rev 04)
+	85:0e.5 0880: 8086:208e (rev 04)
+	85:0e.6 0880: 8086:208e (rev 04)
+	85:0e.7 0880: 8086:208e (rev 04)
+	85:0f.0 0880: 8086:208e (rev 04)
+	85:0f.1 0880: 8086:208e (rev 04)
+	85:0f.2 0880: 8086:208e (rev 04)
+	85:0f.3 0880: 8086:208e (rev 04)
+	85:0f.4 0880: 8086:208e (rev 04)
+	85:0f.5 0880: 8086:208e (rev 04)
+	85:0f.6 0880: 8086:208e (rev 04)
+	85:0f.7 0880: 8086:208e (rev 04)
+	85:10.0 0880: 8086:208e (rev 04)
+	85:10.1 0880: 8086:208e (rev 04)
+	85:10.2 0880: 8086:208e (rev 04)
+	85:10.3 0880: 8086:208e (rev 04)
+	85:10.4 0880: 8086:208e (rev 04)
+	85:10.5 0880: 8086:208e (rev 04)
+	85:10.6 0880: 8086:208e (rev 04)
+	85:10.7 0880: 8086:208e (rev 04)
+	85:11.0 0880: 8086:208e (rev 04)
+	85:11.1 0880: 8086:208e (rev 04)
+	85:11.2 0880: 8086:208e (rev 04)
+	85:11.3 0880: 8086:208e (rev 04)
+	85:1d.0 0880: 8086:2054 (rev 04)
+	85:1d.1 0880: 8086:2055 (rev 04)
+	85:1d.2 0880: 8086:2056 (rev 04)
+	85:1d.3 0880: 8086:2057 (rev 04)
+	85:1e.0 0880: 8086:2080 (rev 04)
+	85:1e.1 0880: 8086:2081 (rev 04)
+	85:1e.2 0880: 8086:2082 (rev 04)
+	85:1e.3 0880: 8086:2083 (rev 04)
+	85:1e.4 0880: 8086:2084 (rev 04)
+	85:1e.5 0880: 8086:2085 (rev 04)
+	85:1e.6 0880: 8086:2086 (rev 04)
+	86:00.0 0700: 1415:c158
+	ae:05.0 0880: 8086:2034 (rev 04)
+	ae:05.2 0880: 8086:2035 (rev 04)
+	ae:05.4 0800: 8086:2036 (rev 04)
+	ae:08.0 0880: 8086:2066 (rev 04)
+	ae:09.0 0880: 8086:2066 (rev 04)
+	ae:0a.0 0880: 8086:2040 (rev 04)
+	ae:0a.1 0880: 8086:2041 (rev 04)
+	ae:0a.2 0880: 8086:2042 (rev 04)
+	ae:0a.3 0880: 8086:2043 (rev 04)
+	ae:0a.4 0880: 8086:2044 (rev 04)
+	ae:0a.5 0880: 8086:2045 (rev 04)
+	ae:0a.6 0880: 8086:2046 (rev 04)
+	ae:0a.7 0880: 8086:2047 (rev 04)
+	ae:0b.0 0880: 8086:2048 (rev 04)
+	ae:0b.1 0880: 8086:2049 (rev 04)
+	ae:0b.2 0880: 8086:204a (rev 04)
+	ae:0b.3 0880: 8086:204b (rev 04)
+	ae:0c.0 0880: 8086:2040 (rev 04)
+	ae:0c.1 0880: 8086:2041 (rev 04)
+	ae:0c.2 0880: 8086:2042 (rev 04)
+	ae:0c.3 0880: 8086:2043 (rev 04)
+	ae:0c.4 0880: 8086:2044 (rev 04)
+	ae:0c.5 0880: 8086:2045 (rev 04)
+	ae:0c.6 0880: 8086:2046 (rev 04)
+	ae:0c.7 0880: 8086:2047 (rev 04)
+	ae:0d.0 0880: 8086:2048 (rev 04)
+	ae:0d.1 0880: 8086:2049 (rev 04)
+	ae:0d.2 0880: 8086:204a (rev 04)
+	ae:0d.3 0880: 8086:204b (rev 04)
+	d7:00.0 0604: 8086:2030 (rev 04)
+	d7:01.0 0604: 8086:2031 (rev 04)
+	d7:02.0 0604: 8086:2032 (rev 04)
+	d7:05.0 0880: 8086:2034 (rev 04)
+	d7:05.2 0880: 8086:2035 (rev 04)
+	d7:05.4 0800: 8086:2036 (rev 04)
+	d7:0e.0 1101: 8086:2058 (rev 04)
+	d7:0e.1 0880: 8086:2059 (rev 04)
+	d7:0f.0 1101: 8086:2058 (rev 04)
+	d7:0f.1 0880: 8086:2059 (rev 04)
+	d7:10.0 1101: 8086:2058 (rev 04)
+	d7:10.1 0880: 8086:2059 (rev 04)
+	d7:12.0 1101: 8086:204c (rev 04)
+	d7:12.1 1101: 8086:204d (rev 04)
+	d7:12.2 0880: 8086:204e (rev 04)
+	d7:12.4 1101: 8086:204c (rev 04)
+	d7:12.5 1101: 8086:204d (rev 04)
+	d7:15.0 0880: 8086:2018 (rev 04)
+	d7:16.0 0880: 8086:2018 (rev 04)
+	d7:16.4 0880: 8086:2018 (rev 04)
+	d7:17.0 0880: 8086:2018 (rev 04)
+	da:00.0 0200: 8086:1563 (rev 01)
+	da:00.1 0200: 8086:1563 (rev 01)
+	</PCI_VID_PID>
+
+	<WAKE_VECTOR_INFO>
+	#define WAKE_VECTOR_32          0x683E300CUL
+	#define WAKE_VECTOR_64          0x683E3018UL
+	</WAKE_VECTOR_INFO>
+
+	<RESET_REGISTER_INFO>
+	#define RESET_REGISTER_ADDRESS  0xCF9UL
+	#define RESET_REGISTER_SPACE_ID SPACE_SYSTEM_IO
+	#define RESET_REGISTER_VALUE    0x6U
+	</RESET_REGISTER_INFO>
+
+	<PM_INFO>
+	#define PM1A_EVT_SPACE_ID       SPACE_SYSTEM_IO
+	#define PM1A_EVT_BIT_WIDTH      0x20U
+	#define PM1A_EVT_BIT_OFFSET     0x0U
+	#define PM1A_EVT_ADDRESS        0x500UL
+	#define PM1A_EVT_ACCESS_SIZE    0x2U
+	#define PM1B_EVT_SPACE_ID       SPACE_SYSTEM_IO
+	#define PM1B_EVT_BIT_WIDTH      0x0U
+	#define PM1B_EVT_BIT_OFFSET     0x0U
+	#define PM1B_EVT_ADDRESS        0x0UL
+	#define PM1B_EVT_ACCESS_SIZE    0x0U
+	#define PM1A_CNT_SPACE_ID       SPACE_SYSTEM_IO
+	#define PM1A_CNT_BIT_WIDTH      0x10U
+	#define PM1A_CNT_BIT_OFFSET     0x0U
+	#define PM1A_CNT_ADDRESS        0x504UL
+	#define PM1A_CNT_ACCESS_SIZE    0x2U
+	#define PM1B_CNT_SPACE_ID       SPACE_SYSTEM_IO
+	#define PM1B_CNT_BIT_WIDTH      0x0U
+	#define PM1B_CNT_BIT_OFFSET     0x0U
+	#define PM1B_CNT_ADDRESS        0x0UL
+	#define PM1B_CNT_ACCESS_SIZE    0x0U
+	</PM_INFO>
+
+	<S3_INFO>
+	</S3_INFO>
+
+	<S5_INFO>
+	#define S5_PKG_VAL_PM1A         0x7U
+	#define S5_PKG_VAL_PM1B         0U
+	#define S5_PKG_RESERVED         0xaU
+	</S5_INFO>
+
+	<DRHD_INFO>
+	#define DRHD_COUNT              8U
+	#define DRHD0_DEV_CNT           10U
+	#define DRHD0_SEGMENT           0U
+	#define DRHD0_FLAGS             0U
+	#define DRHD0_REG_BASE          0xD37FC000UL
+	#define DRHD0_IGNORE            false
+	#define DRHD0_DEVSCOPE0_BUS     0x80U
+	#define DRHD0_DEVSCOPE0_PATH    0x2cU
+	#define DRHD0_DEVSCOPE1_BUS     0x80U
+	#define DRHD0_DEVSCOPE1_PATH    0x20U
+	#define DRHD0_DEVSCOPE2_BUS     0x80U
+	#define DRHD0_DEVSCOPE2_PATH    0x21U
+	#define DRHD0_DEVSCOPE3_BUS     0x80U
+	#define DRHD0_DEVSCOPE3_PATH    0x22U
+	#define DRHD0_DEVSCOPE4_BUS     0x80U
+	#define DRHD0_DEVSCOPE4_PATH    0x23U
+	#define DRHD0_DEVSCOPE5_BUS     0x80U
+	#define DRHD0_DEVSCOPE5_PATH    0x24U
+	#define DRHD0_DEVSCOPE6_BUS     0x0U
+	#define DRHD0_DEVSCOPE6_PATH    0x0U
+	#define DRHD0_DEVSCOPE7_BUS     0x0U
+	#define DRHD0_DEVSCOPE7_PATH    0x0U
+	#define DRHD0_DEVSCOPE8_BUS     0x0U
+	#define DRHD0_DEVSCOPE8_PATH    0x0U
+	#define DRHD0_DEVSCOPE9_BUS     0x0U
+	#define DRHD0_DEVSCOPE9_PATH    0x0U
+	#define DRHD0_IOAPIC_ID         15U
+	#define DRHD1_DEV_CNT           2U
+	#define DRHD1_SEGMENT           0U
+	#define DRHD1_FLAGS             0U
+	#define DRHD1_REG_BASE          0xE0FFC000UL
+	#define DRHD1_IGNORE            false
+	#define DRHD1_DEVSCOPE0_BUS     0x0U
+	#define DRHD1_DEVSCOPE0_PATH    0x0U
+	#define DRHD1_DEVSCOPE1_BUS     0x0U
+	#define DRHD1_DEVSCOPE1_PATH    0x0U
+	#define DRHD1_DEVSCOPE2_BUS     0x0U
+	#define DRHD1_DEVSCOPE2_PATH    0x0U
+	#define DRHD1_DEVSCOPE3_BUS     0x0U
+	#define DRHD1_DEVSCOPE3_PATH    0x0U
+	#define DRHD1_DEVSCOPE4_BUS     0x0U
+	#define DRHD1_DEVSCOPE4_PATH    0x0U
+	#define DRHD1_DEVSCOPE5_BUS     0x0U
+	#define DRHD1_DEVSCOPE5_PATH    0x0U
+	#define DRHD1_DEVSCOPE6_BUS     0x0U
+	#define DRHD1_DEVSCOPE6_PATH    0x0U
+	#define DRHD1_DEVSCOPE7_BUS     0x0U
+	#define DRHD1_DEVSCOPE7_PATH    0x0U
+	#define DRHD1_DEVSCOPE8_BUS     0x0U
+	#define DRHD1_DEVSCOPE8_PATH    0x0U
+	#define DRHD1_DEVSCOPE9_BUS     0x0U
+	#define DRHD1_DEVSCOPE9_PATH    0x0U
+	#define DRHD1_IOAPIC_ID         16U
+	#define DRHD2_DEV_CNT           1U
+	#define DRHD2_SEGMENT           0U
+	#define DRHD2_FLAGS             0U
+	#define DRHD2_REG_BASE          0xEE7FC000UL
+	#define DRHD2_IGNORE            false
+	#define DRHD2_DEVSCOPE0_BUS     0x0U
+	#define DRHD2_DEVSCOPE0_PATH    0x0U
+	#define DRHD2_DEVSCOPE1_BUS     0x0U
+	#define DRHD2_DEVSCOPE1_PATH    0x0U
+	#define DRHD2_DEVSCOPE2_BUS     0x0U
+	#define DRHD2_DEVSCOPE2_PATH    0x0U
+	#define DRHD2_DEVSCOPE3_BUS     0x0U
+	#define DRHD2_DEVSCOPE3_PATH    0x0U
+	#define DRHD2_DEVSCOPE4_BUS     0x0U
+	#define DRHD2_DEVSCOPE4_PATH    0x0U
+	#define DRHD2_DEVSCOPE5_BUS     0x0U
+	#define DRHD2_DEVSCOPE5_PATH    0x0U
+	#define DRHD2_DEVSCOPE6_BUS     0x0U
+	#define DRHD2_DEVSCOPE6_PATH    0x0U
+	#define DRHD2_DEVSCOPE7_BUS     0x0U
+	#define DRHD2_DEVSCOPE7_PATH    0x0U
+	#define DRHD2_DEVSCOPE8_BUS     0x0U
+	#define DRHD2_DEVSCOPE8_PATH    0x0U
+	#define DRHD2_DEVSCOPE9_BUS     0x0U
+	#define DRHD2_DEVSCOPE9_PATH    0x0U
+	#define DRHD2_IOAPIC_ID         17U
+	#define DRHD3_DEV_CNT           4U
+	#define DRHD3_SEGMENT           0U
+	#define DRHD3_FLAGS             0U
+	#define DRHD3_REG_BASE          0xFBFFC000UL
+	#define DRHD3_IGNORE            false
+	#define DRHD3_DEVSCOPE0_BUS     0x0U
+	#define DRHD3_DEVSCOPE0_PATH    0x0U
+	#define DRHD3_DEVSCOPE1_BUS     0x0U
+	#define DRHD3_DEVSCOPE1_PATH    0x0U
+	#define DRHD3_DEVSCOPE2_BUS     0x0U
+	#define DRHD3_DEVSCOPE2_PATH    0x0U
+	#define DRHD3_DEVSCOPE3_BUS     0x0U
+	#define DRHD3_DEVSCOPE3_PATH    0x0U
+	#define DRHD3_DEVSCOPE4_BUS     0x0U
+	#define DRHD3_DEVSCOPE4_PATH    0x0U
+	#define DRHD3_DEVSCOPE5_BUS     0x0U
+	#define DRHD3_DEVSCOPE5_PATH    0x0U
+	#define DRHD3_DEVSCOPE6_BUS     0x0U
+	#define DRHD3_DEVSCOPE6_PATH    0x0U
+	#define DRHD3_DEVSCOPE7_BUS     0x0U
+	#define DRHD3_DEVSCOPE7_PATH    0x0U
+	#define DRHD3_DEVSCOPE8_BUS     0x0U
+	#define DRHD3_DEVSCOPE8_PATH    0x0U
+	#define DRHD3_DEVSCOPE9_BUS     0x0U
+	#define DRHD3_DEVSCOPE9_PATH    0x0U
+	#define DRHD3_IOAPIC_ID         18U
+	#define DRHD4_DEV_CNT           1U
+	#define DRHD4_SEGMENT           0U
+	#define DRHD4_FLAGS             0U
+	#define DRHD4_REG_BASE          0xAAFFC000UL
+	#define DRHD4_IGNORE            false
+	#define DRHD4_DEVSCOPE0_BUS     0x0U
+	#define DRHD4_DEVSCOPE0_PATH    0x0U
+	#define DRHD4_DEVSCOPE1_BUS     0x0U
+	#define DRHD4_DEVSCOPE1_PATH    0x0U
+	#define DRHD4_DEVSCOPE2_BUS     0x0U
+	#define DRHD4_DEVSCOPE2_PATH    0x0U
+	#define DRHD4_DEVSCOPE3_BUS     0x0U
+	#define DRHD4_DEVSCOPE3_PATH    0x0U
+	#define DRHD4_DEVSCOPE4_BUS     0x0U
+	#define DRHD4_DEVSCOPE4_PATH    0x0U
+	#define DRHD4_DEVSCOPE5_BUS     0x0U
+	#define DRHD4_DEVSCOPE5_PATH    0x0U
+	#define DRHD4_DEVSCOPE6_BUS     0x0U
+	#define DRHD4_DEVSCOPE6_PATH    0x0U
+	#define DRHD4_DEVSCOPE7_BUS     0x0U
+	#define DRHD4_DEVSCOPE7_PATH    0x0U
+	#define DRHD4_DEVSCOPE8_BUS     0x0U
+	#define DRHD4_DEVSCOPE8_PATH    0x0U
+	#define DRHD4_DEVSCOPE9_BUS     0x0U
+	#define DRHD4_DEVSCOPE9_PATH    0x0U
+	#define DRHD4_IOAPIC_ID         10U
+	#define DRHD5_DEV_CNT           2U
+	#define DRHD5_SEGMENT           0U
+	#define DRHD5_FLAGS             0U
+	#define DRHD5_REG_BASE          0xB87FC000UL
+	#define DRHD5_IGNORE            false
+	#define DRHD5_DEVSCOPE0_BUS     0x0U
+	#define DRHD5_DEVSCOPE0_PATH    0x0U
+	#define DRHD5_DEVSCOPE1_BUS     0x0U
+	#define DRHD5_DEVSCOPE1_PATH    0x0U
+	#define DRHD5_DEVSCOPE2_BUS     0x0U
+	#define DRHD5_DEVSCOPE2_PATH    0x0U
+	#define DRHD5_DEVSCOPE3_BUS     0x0U
+	#define DRHD5_DEVSCOPE3_PATH    0x0U
+	#define DRHD5_DEVSCOPE4_BUS     0x0U
+	#define DRHD5_DEVSCOPE4_PATH    0x0U
+	#define DRHD5_DEVSCOPE5_BUS     0x0U
+	#define DRHD5_DEVSCOPE5_PATH    0x0U
+	#define DRHD5_DEVSCOPE6_BUS     0x0U
+	#define DRHD5_DEVSCOPE6_PATH    0x0U
+	#define DRHD5_DEVSCOPE7_BUS     0x0U
+	#define DRHD5_DEVSCOPE7_PATH    0x0U
+	#define DRHD5_DEVSCOPE8_BUS     0x0U
+	#define DRHD5_DEVSCOPE8_PATH    0x0U
+	#define DRHD5_DEVSCOPE9_BUS     0x0U
+	#define DRHD5_DEVSCOPE9_PATH    0x0U
+	#define DRHD5_IOAPIC_ID         11U
+	#define DRHD6_DEV_CNT           3U
+	#define DRHD6_SEGMENT           0U
+	#define DRHD6_FLAGS             0U
+	#define DRHD6_REG_BASE          0xC5FFC000UL
+	#define DRHD6_IGNORE            false
+	#define DRHD6_DEVSCOPE0_BUS     0x80U
+	#define DRHD6_DEVSCOPE0_PATH    0x25U
+	#define DRHD6_DEVSCOPE1_BUS     0x80U
+	#define DRHD6_DEVSCOPE1_PATH    0x26U
+	#define DRHD6_DEVSCOPE2_BUS     0x80U
+	#define DRHD6_DEVSCOPE2_PATH    0x27U
+	#define DRHD6_DEVSCOPE3_BUS     0x80U
+	#define DRHD6_DEVSCOPE3_PATH    0x0U
+	#define DRHD6_DEVSCOPE4_BUS     0x85U
+	#define DRHD6_DEVSCOPE4_PATH    0x2cU
+	#define DRHD6_DEVSCOPE5_BUS     0x85U
+	#define DRHD6_DEVSCOPE5_PATH    0x10U
+	#define DRHD6_DEVSCOPE6_BUS     0xaeU
+	#define DRHD6_DEVSCOPE6_PATH    0x2cU
+	#define DRHD6_DEVSCOPE7_BUS     0xd7U
+	#define DRHD6_DEVSCOPE7_PATH    0x2cU
+	#define DRHD6_DEVSCOPE8_BUS     0xd7U
+	#define DRHD6_DEVSCOPE8_PATH    0x0U
+	#define DRHD6_DEVSCOPE9_BUS     0xd7U
+	#define DRHD6_DEVSCOPE9_PATH    0x8U
+	#define DRHD6_IOAPIC_ID         12U
+	#define DRHD7_DEV_CNT           3U
+	#define DRHD7_SEGMENT           0U
+	#define DRHD7_FLAGS             1U
+	#define DRHD7_REG_BASE          0x9D7FC000UL
+	#define DRHD7_IGNORE            false
+	#define DRHD7_DEVSCOPE0_BUS     0xd7U
+	#define DRHD7_DEVSCOPE0_PATH    0x10U
+	#define DRHD7_DEVSCOPE1_BUS     0x17U
+	#define DRHD7_DEVSCOPE1_PATH    0x2cU
+	#define DRHD7_DEVSCOPE2_BUS     0x3aU
+	#define DRHD7_DEVSCOPE2_PATH    0x2cU
+	#define DRHD7_DEVSCOPE3_BUS     0x3aU
+	#define DRHD7_DEVSCOPE3_PATH    0x0U
+	#define DRHD7_DEVSCOPE4_BUS     0x5dU
+	#define DRHD7_DEVSCOPE4_PATH    0x2cU
+	#define DRHD7_DEVSCOPE5_BUS     0x5dU
+	#define DRHD7_DEVSCOPE5_PATH    0x10U
+	#define DRHD7_DEVSCOPE6_BUS     0x5dU
+	#define DRHD7_DEVSCOPE6_PATH    0x18U
+	#define DRHD7_DEVSCOPE7_BUS     0xf0U
+	#define DRHD7_DEVSCOPE7_PATH    0xf8U
+	#define DRHD7_DEVSCOPE8_BUS     0x0U
+	#define DRHD7_DEVSCOPE8_PATH    0x2cU
+	#define DRHD7_DEVSCOPE9_BUS     0x0U
+	#define DRHD7_DEVSCOPE9_PATH    0xf8U
+	#define DRHD7_IOAPIC_ID         9U
+	</DRHD_INFO>
+
+	<CPU_BRAND>
+	"Intel(R) Xeon(R) Gold 6139 CPU @ 2.30GHz"
+	</CPU_BRAND>
+
+	<CX_INFO>
+	{{SPACE_FFixedHW, 0x00U, 0x00U, 0x00U, 0x00UL}, 0x01U, 0x01U, 0x00U},	/* C1 */
+	{{SPACE_SYSTEM_IO, 0x08U, 0x00U, 0x00U, 0x515UL}, 0x02U, 0x29U, 0x00U},	/* C2 */
+	</CX_INFO>
+
+	<PX_INFO>
+	</PX_INFO>
+
+	<CLOS_INFO>
+	clos supported by cache:L3
+	clos max:16
+	</CLOS_INFO>
+
+	<SYSTEM_RAM_INFO>
+	00001000-0009bfff : System RAM
+	00100000-5c682fff : System RAM
+	5c722000-5d2bcfff : System RAM
+	5d59e000-5fb0bfff : System RAM
+	5fb67000-5fbcefff : System RAM
+	5fbfd000-60069fff : System RAM
+	60291000-63b2ffff : System RAM
+	63bdf000-6426bfff : System RAM
+	642f2000-6464dfff : System RAM
+	64c50000-64ccdfff : System RAM
+	65cce000-67735fff : System RAM
+	68566000-6fafffff : System RAM
+	100c00000-303fffffff : System RAM
+	</SYSTEM_RAM_INFO>
+
+	<BLOCK_DEVICE_INFO>
+	/dev/nvme1n1p2: UUID="bd03a411-3cde-4433-a982-227444717d24" TYPE="ext4" PARTUUID="d71c6664-c431-437b-839f-50a6b8409f7a"
+	/dev/nvme0n1p1: UUID="b130bb75-f80a-4343-ab58-14a61faaa439" TYPE="ext4" PARTUUID="980458f8-801e-40c4-a993-6a7fe18bacb1"
+	</BLOCK_DEVICE_INFO>
+
+	<TTYS_INFO>
+	BDF:(da:00.1) seri:/dev/ttyS0 base:0x3F8 irq:4
+	BDF:(da:00.1) seri:/dev/ttyS1 base:0x2F8 irq:3
+	</TTYS_INFO>
+
+	<AVAILABLE_IRQ_INFO>
+	5, 6, 7, 10, 11, 12, 13, 14, 15
+	</AVAILABLE_IRQ_INFO>
+
+	<TOTAL_MEM_INFO>
+	196732972 kB
+	</TOTAL_MEM_INFO>
+
+	<CPU_PROCESSOR_INFO>
+	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+	</CPU_PROCESSOR_INFO>
+
+</acrn-config>
