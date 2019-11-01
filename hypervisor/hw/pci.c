@@ -40,7 +40,7 @@ static spinlock_t pci_device_lock;
 static uint32_t num_pci_pdev;
 static struct pci_pdev pci_pdev_array[CONFIG_MAX_PCI_DEV_NUM];
 
-static void init_pdev(uint16_t pbdf);
+static struct pci_pdev *init_pdev(uint16_t pbdf);
 
 
 static uint32_t pci_pdev_calc_address(union pci_bdf bdf, uint32_t offset)
@@ -318,12 +318,15 @@ static void fill_pdev(uint16_t pbdf, struct pci_pdev *pdev)
 	fill_pci_dev_config(pdev);
 }
 
-static void init_pdev(uint16_t pbdf)
+static struct pci_pdev *init_pdev(uint16_t pbdf)
 {
+	struct pci_pdev *pdev = NULL;
 	if (num_pci_pdev < CONFIG_MAX_PCI_DEV_NUM) {
-		fill_pdev(pbdf, &pci_pdev_array[num_pci_pdev]);
+		pdev = &pci_pdev_array[num_pci_pdev];
+		fill_pdev(pbdf, pdev);
 		num_pci_pdev++;
 	} else {
 		pr_err("%s, failed to alloc pci_pdev!\n", __func__);
 	}
+	return pdev;
 }
