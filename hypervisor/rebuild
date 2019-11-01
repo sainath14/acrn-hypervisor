@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+# Arguments passed to this script are given to make
+set -e; set -u; set -v
+make clean
+mkdir -p build
+cp -v acrn-dot-config build/.config
+make BOARD="wolfpass" $@
+echo ''; echo ''
+cp -v build/acrn.32.out /tftpboot/pxelinux.cfg/acrn/
