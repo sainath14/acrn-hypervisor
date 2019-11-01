@@ -45,6 +45,15 @@ static struct pci_pdev pci_pdev_array[CONFIG_MAX_PCI_DEV_NUM];
 
 static struct pci_pdev *init_pdev(uint16_t pbdf);
 
+uint32_t pci_lookup_drhd_for_pbdf(uint16_t pbdf)
+{
+	struct pci_pdev *pdev, *last = &pci_pdev_array[CONFIG_MAX_PCI_DEV_NUM-1U];
+	uint32_t index = -1U;
+	for (pdev = pci_pdev_array; pdev <= last && index == -1U; pdev++)
+		if (pdev->bdf.value == pbdf)
+			index = pdev->drhd_idx;
+	return index;
+}
 
 static uint32_t pci_pdev_calc_address(union pci_bdf bdf, uint32_t offset)
 {
