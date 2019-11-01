@@ -35,6 +35,8 @@
 #include <uart16550.h>
 #include <logmsg.h>
 #include <pci_dev.h>
+#include <vtd.h>
+#include <bits.h>
 
 static spinlock_t pci_device_lock;
 static uint32_t num_pci_pdev;
@@ -134,67 +136,180 @@ void enable_disable_pci_intx(union pci_bdf bdf, bool enable)
 	}
 }
 
-#define BUS_SCAN_SKIP		0U
-#define BUS_SCAN_PENDING	1U
-#define BUS_SCAN_COMPLETE	2U
-void init_pci_pdev_list(void)
+static bool skip_device(union pci_bdf pbdf)
 {
+	/* if it is debug uart, hide it from SOS */
+	if (is_pci_dbg_uart(pbdf)) {
+		pr_info("hide pci uart dev: (%x:%x:%x)", pbdf.bits.b, pbdf.bits.d, pbdf.bits.f);
+		return true;
+	}
+
+	return false;
+}
+
+static struct pci_pdev *try_add_pci_device(union pci_bdf pbdf)
+{
+	struct pci_pdev *pdev = NULL;
+	if (!skip_device(pbdf))
+		pdev = init_pdev(pbdf.value);
+	return pdev;
+}
+
+/* quantity of buses_bitmap_t to encode a bitmap of all bus values */
+#define BUSES_BITMAP_LEN	((PCI_BUSMAX + 1U) >> 6U)
+
+/* must be >= total Endpoints in all DRDH devscope */
+#define BDF_SET_LEN			32U
+
+typedef uint64_t buses_bitmap_t;
+
+struct bdf_set {
+	uint32_t n;
+	union pci_bdf bdfs[BDF_SET_LEN];
+};
+
+static void link_pdev_with_iommu(struct pci_pdev *pdev, void *drhd_idx)
+{
+	pdev->drhd_idx = (uint32_t)(uint64_t)drhd_idx;
+}
+
+/* Scan part of PCI hierarchy, starting with the given bus. */
+static void init_pci_hierarchy(uint8_t bus, buses_bitmap_t *buses_visited,
+				struct bdf_set *exclude_bdfs,
+				void (*pdev_post_action)(struct pci_pdev*, void*),
+				void *action_data)
+{
+	bool is_mfdev;
+	bool was_visited;
+	struct pci_pdev *pdev;
+	uint32_t vendor, bdfi;
+	uint8_t hdr_type, dev, func;
 	union pci_bdf pbdf;
-	uint8_t hdr_type, secondary_bus, dev, func;
-	uint32_t bus, val;
-	uint8_t bus_to_scan[PCI_BUSMAX + 1] = { BUS_SCAN_SKIP };
 
-	/* start from bus 0 */
-	bus_to_scan[0U] = BUS_SCAN_PENDING;
+	uint8_t buses[PCI_BUSMAX + 1U]; /* FIFO queue of buses to walk */
+	uint32_t s = 0U, e = 0U; /* start and end index into queue */
 
-	for (bus = 0U; bus <= PCI_BUSMAX; bus++) {
-		if (bus_to_scan[bus] != BUS_SCAN_PENDING) {
+	buses[e++] = bus;
+	while (s < e) {
+		bus = buses[s++];
+
+		was_visited = bitmap_test_and_set_nolock(bus, buses_visited + (bus >> 6U));
+		if (was_visited)
 			continue;
-		}
 
-		bus_to_scan[bus] = BUS_SCAN_COMPLETE;
-		pbdf.bits.b = (uint8_t)bus;
-
+		pbdf.bits.b = bus;
 		for (dev = 0U; dev <= PCI_SLOTMAX; dev++) {
 			pbdf.bits.d = dev;
+			is_mfdev = false;
 
 			for (func = 0U; func <= PCI_FUNCMAX; func++) {
 				pbdf.bits.f = func;
-				val = pci_pdev_read_cfg(pbdf, PCIR_VENDOR, 4U);
 
-				if ((val == 0xFFFFFFFFU) || (val == 0U) || (val == 0xFFFF0000U) || (val == 0xFFFFU)) {
-					/* If function 0 is not implemented, skip to next device */
-					if (func == 0U) {
+				/* Do not probe beyond function 0 if not a multi-function device
+				 * TODO unless device supports ARI or SR-IOV
+				 * (PCIe spec r5.0 §7.5.1.1.9)
+				 */
+				if (func > 0U && !is_mfdev)
+					break;
+
+				if (exclude_bdfs)
+					for (bdfi = 0U; bdfi < BDF_SET_LEN; bdfi++)
+						if (exclude_bdfs->bdfs[bdfi].value == pbdf.value)
+							continue;
+
+				vendor = pci_pdev_read_cfg_vendor(pbdf);
+
+				if (!pci_vendor_is_valid(vendor)) {
+					if (func == 0U)
 						break;
-					}
-
-					/* continue scan next function */
 					continue;
 				}
 
-				/* if it is debug uart, hide it from SOS */
-				if (is_pci_dbg_uart(pbdf)) {
-					pr_info("hide pci uart dev: (%x:%x:%x)", pbdf.bits.b, pbdf.bits.d, pbdf.bits.f);
-					continue;
-				}
+				hdr_type = pci_pdev_read_cfg_headertype(pbdf);
 
-				init_pdev(pbdf.value);
+				if (func == 0U)
+					is_mfdev = pci_cfg_is_multifunction(hdr_type);
 
-				hdr_type = (uint8_t)pci_pdev_read_cfg(pbdf, PCIR_HDRTYPE, 1U);
-				if ((hdr_type & PCIM_HDRTYPE) == PCIM_HDRTYPE_BRIDGE) {
+				if ((pdev = try_add_pci_device(pbdf)) && pdev_post_action)
+					pdev_post_action(pdev, action_data);
 
-					/* Secondary bus to be scanned */
-					secondary_bus = (uint8_t)pci_pdev_read_cfg(pbdf, PCIR_SECBUS_1, 1U);
-					if (bus_to_scan[secondary_bus] != BUS_SCAN_SKIP) {
-						pr_err("%s, bus %d may be downstream of different PCI bridges",
-							__func__, secondary_bus);
-					} else {
-						bus_to_scan[secondary_bus] = BUS_SCAN_PENDING;
-					}
-				}
+				if (pci_cfg_is_bridge(hdr_type))
+					buses[e++] = pci_pdev_read_cfg_secbus(pbdf);
 			}
 		}
 	}
+}
+
+/* Initialize PCI devices, linking them with info from DRHD Endpoint entries. */
+static bool pci_add_endpoints_from_drhd(struct dmar_drhd *drhd, void *data)
+{
+	struct bdf_set *endpoints = (struct bdf_set*)data;
+	struct dmar_dev_scope *device, *devices = drhd->devices;
+	struct pci_pdev *pdev;
+
+	for (device = &devices[0]; device <= &devices[drhd->dev_cnt - 1U]; device++) {
+		if (device->type != ACPI_DMAR_SCOPE_TYPE_ENDPOINT)
+			continue;
+
+		union pci_bdf bdf;
+		bdf.bits.b = device->bus;
+		bdf.bits.d = device->devfun >> 3U;
+		bdf.bits.f = device->devfun;
+
+		if ((pdev = try_add_pci_device(bdf))) {
+			link_pdev_with_iommu(pdev, (void*)(uint64_t)drhd->index);
+			if (endpoints->n < BDF_SET_LEN)
+				endpoints->bdfs[endpoints->n++] = bdf;
+			else
+				panic("Too many Endpoints in DRHDs");
+		}
+	}
+	return true;
+}
+
+/* Initialize PCI devices, linking them with info from DRHD Bridge entries. */
+static bool pci_add_bridge_from_drhd(struct dmar_drhd *drhd, void *data)
+{
+	buses_bitmap_t *buses_visited = (buses_bitmap_t*)data;
+	struct dmar_dev_scope *device, *devices = drhd->devices;
+
+	for (device = &devices[0]; device <= &devices[drhd->dev_cnt - 1U]; device++)
+		if (device->type == ACPI_DMAR_SCOPE_TYPE_BRIDGE)
+			init_pci_hierarchy(device->bus, buses_visited, NULL,
+					link_pdev_with_iommu, (void*)(uint64_t)drhd->index);
+	return true;
+}
+
+static bool identify_include_pci_all(struct dmar_drhd *drhd, void *drhd_idx)
+{
+	bool cont = true;
+	if (drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) {
+		*((uint32_t*)drhd_idx) = drhd->index;
+		cont = false;
+	}
+	return cont;
+}
+
+/* @pre IOMMU state initialized */
+void init_pci_pdev_list(void)
+{
+	buses_bitmap_t buses_visited[BUSES_BITMAP_LEN] = {0UL};
+	struct bdf_set endpoints_visited;
+	uint32_t drhd_idx_pci_all = -1U;
+	uint16_t bus;
+
+	iommu_do_for_each(pci_add_endpoints_from_drhd, (void*)&endpoints_visited);
+	iommu_do_for_each(pci_add_bridge_from_drhd, (void*)buses_visited);
+	iommu_do_for_each(identify_include_pci_all, (void*)&drhd_idx_pci_all);
+
+	if (drhd_idx_pci_all == -1U)
+		panic("No DRHD found with flag[0] INCLUDE_PCI_ALL set");
+
+	/* TODO: faster to avoid invoking init_pci_hierarchy on buses visited */
+	/* TODO: iterate over list of PCI Host Bridges found in ACPI namespace */
+	for (bus = 0U; bus <= PCI_BUSMAX; bus++)
+		init_pci_hierarchy((uint8_t)bus, buses_visited, &endpoints_visited,
+				link_pdev_with_iommu, (void*)(uint64_t)drhd_idx_pci_all);
 }
 
 static uint32_t pci_pdev_get_nr_bars(uint8_t hdr_type)
