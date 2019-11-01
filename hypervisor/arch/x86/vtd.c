@@ -20,6 +20,7 @@
 #include <timer.h>
 #include <logmsg.h>
 #include <vm_configurations.h>
+#include <pci.h>
 
 #define DBG_IOMMU 0
 
@@ -552,35 +553,15 @@ static struct dmar_drhd_rt *ioapic_to_dmaru(uint16_t ioapic_id, union pci_bdf *s
 
 static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8_t devfun)
 {
-	struct dmar_drhd_rt *dmar_unit = NULL;
-	uint32_t i, j;
-
-	for (j = 0U; j < platform_dmar_info->drhd_count; j++) {
-		dmar_unit = &dmar_drhd_units[j];
-
-		if (dmar_unit->drhd->segment != segment) {
-			continue;
-		}
-
-		for (i = 0U; i < dmar_unit->drhd->dev_cnt; i++) {
-			if ((dmar_unit->drhd->devices[i].bus == bus) &&
-					(dmar_unit->drhd->devices[i].devfun == devfun)) {
-				break;
-			}
-		}
-
-		/* found exact one or the one which has the same segment number with INCLUDE_PCI_ALL set */
-		if ((i != dmar_unit->drhd->dev_cnt) || ((dmar_unit->drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) != 0U)) {
-			break;
-		}
-	}
-
-	/* not found */
-	if (j == platform_dmar_info->drhd_count) {
-		dmar_unit = NULL;
-	}
-
-	return dmar_unit;
+	(void)segment; /* TODO what to do with this? */
+	struct dmar_drhd_rt *dmaru = NULL;
+	uint16_t bdf = (uint16_t)bus << 8U | devfun;
+	uint32_t index = pci_lookup_drhd_for_pbdf(bdf);
+	if (index == -1U)
+		pr_fatal("BDF %02x:%02x:%x has no IOMMU\n", bus, devfun >> 3U, devfun & 7U);
+	else
+		dmaru = &dmar_drhd_units[index];
+	return dmaru;
 }
 
 static void dmar_issue_qi_request(struct dmar_drhd_rt *dmar_unit, struct dmar_entry invalidate_desc)
