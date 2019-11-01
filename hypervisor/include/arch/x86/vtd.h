@@ -487,6 +487,7 @@ struct dmar_dev_scope {
 };
 
 struct dmar_drhd {
+	uint32_t index;
 	uint32_t dev_cnt;
 	uint16_t segment;
 	uint8_t flags;
