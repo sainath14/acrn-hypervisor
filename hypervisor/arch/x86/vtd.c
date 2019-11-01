@@ -1225,7 +1225,7 @@ static int32_t remove_iommu_device(const struct iommu_domain *domain, uint16_t s
  * @pre action != NULL
  * As an internal API, VT-d code can guarantee action is not NULL.
  */
-static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
+void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 {
 	struct dmar_drhd_rt *dmar_unit;
 	uint32_t i;
@@ -1237,6 +1237,43 @@ static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 		} else {
 			dev_dbg(ACRN_DBG_IOMMU, "ignore dmar_unit @0x%x", dmar_unit->drhd->reg_base_addr);
 		}
+	}
+}
+
+/* @brief: Public API access parse DRHD structures
+ * Parses DRHD structures and passes device scope entry details to PCI module
+ * Returns the last DRHD structure index if INCLUDE_PCI_ALL flag is set
+ *
+ * @pre action_on_pci_endpoint != NULL
+ * @pre action_on_pci_sub_hierarchy != NULL
+ * @pre drhd_idx != NULL
+ * @pre platform_dmar_info->drhd_count > 0U
+ */
+void iommu_do_for_each(void (*action_on_pci_endpoint)(union pci_bdf, void *, void *),
+			void (*action_on_pci_sub_hierarchy)(union pci_bdf, void *, void *, void *),
+			void *arg1, void *arg2, uint32_t *drhd_idx)
+{
+	uint32_t index;
+	struct dmar_dev_scope *device, *devices;
+	struct dmar_drhd *drhd = NULL;
+	union pci_bdf bdf;
+
+	for (index = 0U; index < platform_dmar_info->drhd_count; index++) {
+		drhd = dmar_drhd_units[index].drhd;
+		devices = drhd->devices;
+		for (device = &devices[0]; device <= &devices[drhd->dev_cnt - 1U]; device++) {
+			bdf.fields.bus = device->bus;
+			bdf.fields.devfun = device->devfun;
+			if (device->type == ACPI_DMAR_SCOPE_TYPE_ENDPOINT) {
+				action_on_pci_endpoint(bdf, arg1, (void *)(uint64_t) index);
+			} else if (device->type == ACPI_DMAR_SCOPE_TYPE_BRIDGE) {
+				action_on_pci_sub_hierarchy(bdf, arg1, arg2, (void *)(uint64_t) index);
+			}
+		}
+	}
+
+	if (drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) {
+		*drhd_idx = platform_dmar_info->drhd_count - 1U;
 	}
 }
 
