@@ -97,8 +97,10 @@ static struct dmar_info plat_dmar_info = {
 static void init_dmar_info(struct dmar_info *info)
 {
 	uint32_t i;
-	for (i = 0U; i < MAX_DRHDS; i++)
+	for (i = 0U; i < MAX_DRHDS; i++) {
 		info->drhd_units[i].devices = &devices[i * MAX_DRHD_DEVSCOPES];
+		info->drhd_units[i].index = i;
+	}
 #ifndef CONFIG_ACPI_PARSE_ENABLED
 	init_static_mapping();
 #endif
