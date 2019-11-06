@@ -8,6 +8,7 @@
 #ifndef MISC_CFG_H
 #define MISC_CFG_H
 
+#define CONFIG_MAX_PCPU_NUM     36U
 #define ROOTFS_0		"root=/dev/nvme1n1p2 "
 #define ROOTFS_1		"root=/dev/nvme0n1p1 "
 

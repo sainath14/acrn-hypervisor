@@ -388,14 +388,14 @@ static struct pci_pdev *init_pdev(uint16_t pbdf)
 {
 	uint8_t hdr_type;
 	union pci_bdf bdf;
-	struct pci_pdev *pdev;
+	struct pci_pdev *pdev = NULL;
 
 	if (num_pci_pdev < CONFIG_MAX_PCI_DEV_NUM) {
 		bdf.value = pbdf;
 		hdr_type = (uint8_t)pci_pdev_read_cfg(bdf, PCIR_HDRTYPE, 1U);
 		hdr_type &= PCIM_HDRTYPE;
 
-		if ((hdr_type == PCIM_HDRTYPE_NORMAL) || (hdr_type == PCIM_HDRTYPE_BRIDGE))
+		if ((hdr_type == PCIM_HDRTYPE_NORMAL) || (hdr_type == PCIM_HDRTYPE_BRIDGE)) {
 			pdev = &pci_pdev_array[num_pci_pdev];
 			pdev->bdf.value = pbdf;
 			pdev->nr_bars = pci_pdev_get_nr_bars(hdr_type);
