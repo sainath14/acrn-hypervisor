@@ -652,7 +652,9 @@ int32_t init_iommu(void);
  * when action routine returns false. Return immediately if action routine is
  * NULL.
  */
-void iommu_do_for_each(bool (*action)(struct dmar_drhd *, void *), void *data);
+void iommu_do_for_each(void (*action_on_pci_endpoint)(union pci_bdf, void *, void *),
+			void (*action_on_pci_sub_hierarchy)(union pci_bdf, void *, void *),
+			void *data, uint32_t *drhd_idx);
 
 /**
  * @brief check the iommu if support cache snoop.

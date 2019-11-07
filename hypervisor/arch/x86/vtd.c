@@ -1221,20 +1221,42 @@ void __do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 	}
 }
 
-/* Public API access to DRHD structures
- * Note, the parameter here is a public structure; the sibling method above
- * passes in an internal drhd structure unavailable to the public.
- * We stop iterating when action returns false.
+/* @brief: Public API access parse DRHD structures
+ * Parses DRHD structures and passes device scope entry details to PCI module
+ * Returns the last DRHD structure index if INCLUDE_PCI_ALL flag is set
+ *
+ * @pre action_on_pci_endpoint != NULL
+ * @pre action_on_pci_sub_hierarchy != NULL
+ * @pre drhd_idx != NULL 
  */
-void iommu_do_for_each(bool (*action)(struct dmar_drhd *, void *), void *data)
+void iommu_do_for_each(void (*action_on_pci_endpoint)(union pci_bdf, void *, void *),
+			void (*action_on_pci_sub_hierarchy)(union pci_bdf, void *, void *),
+			void *data, uint32_t *drhd_idx)
 {
 	uint32_t i;
-	if (!action)
-		return;
-	for (i = 0U; i < platform_dmar_info->drhd_count; i++)
-		if (!dmar_drhd_units[i].drhd->ignore)
-			if (!action(dmar_drhd_units[i].drhd, data))
-				break;
+	struct dmar_dev_scope *device, *devices;
+	struct dmar_drhd *drhd = NULL;
+	union pci_bdf bdf;
+
+	for (i = 0U; i < platform_dmar_info->drhd_count; i++) {
+		drhd = dmar_drhd_units[i].drhd;
+		if (!dmar_drhd_units[i].drhd->ignore) {
+			devices = drhd->devices;
+			for (device = &devices[0]; device <= &devices[drhd->dev_cnt - 1U]; device++) {
+				bdf.fields.bus = device->bus;
+				bdf.fields.devfun = device->devfun;
+				if (device->type == ACPI_DMAR_SCOPE_TYPE_ENDPOINT) {
+					action_on_pci_endpoint(bdf, data, (void *)(uint64_t) drhd->index);
+				} else if (device->type == ACPI_DMAR_SCOPE_TYPE_BRIDGE) {
+					action_on_pci_sub_hierarchy(bdf, data, (void *)(uint64_t) drhd->index);
+				}
+			}
+		}
+	}
+
+	if (drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) {
+		*drhd_idx = drhd->index;
+	}
 }
 
 struct iommu_domain *create_iommu_domain(uint16_t vm_id, uint64_t translation_table, uint32_t addr_width)
