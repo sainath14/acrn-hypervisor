@@ -1280,6 +1280,7 @@ struct iommu_domain *create_iommu_domain(uint16_t vm_id, uint64_t translation_ta
  */
 void destroy_iommu_domain(struct iommu_domain *domain)
 {
+	/*hello*/
 	/* currently only support ept */
 	if (!domain->is_tt_ept) {
 		ASSERT(false, "translation_table is not EPT!");
