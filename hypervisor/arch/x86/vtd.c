@@ -21,6 +21,7 @@
 #include <logmsg.h>
 #include <board.h>
 #include <vm_configurations.h>
+#include <pci.h>
 
 #define DBG_IOMMU 0
 
@@ -555,35 +556,15 @@ static struct dmar_drhd_rt *ioapic_to_dmaru(uint16_t ioapic_id, union pci_bdf *s
 
 static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8_t devfun)
 {
-	struct dmar_drhd_rt *dmar_unit = NULL;
-	uint32_t i, j;
-
-	for (j = 0U; j < platform_dmar_info->drhd_count; j++) {
-		dmar_unit = &dmar_drhd_units[j];
-
-		if (dmar_unit->drhd->segment != segment) {
-			continue;
-		}
-
-		for (i = 0U; i < dmar_unit->drhd->dev_cnt; i++) {
-			if ((dmar_unit->drhd->devices[i].bus == bus) &&
-					(dmar_unit->drhd->devices[i].devfun == devfun)) {
-				break;
-			}
-		}
-
-		/* found exact one or the one which has the same segment number with INCLUDE_PCI_ALL set */
-		if ((i != dmar_unit->drhd->dev_cnt) || ((dmar_unit->drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) != 0U)) {
-			break;
-		}
-	}
-
-	/* not found */
-	if (j == platform_dmar_info->drhd_count) {
-		dmar_unit = NULL;
-	}
-
-	return dmar_unit;
+	(void)segment; /* TODO what to do with this? */
+	struct dmar_drhd_rt *dmaru = NULL;
+	uint16_t bdf = (uint16_t)bus << 8U | devfun;
+	uint32_t index = pci_lookup_drhd_for_pbdf(bdf);
+	if (index == -1U)
+		pr_fatal("BDF %02x:%02x:%x has no IOMMU\n", bus, devfun >> 3U, devfun & 7U);
+	else
+		dmaru = &dmar_drhd_units[index];
+	return dmaru;
 }
 
 static void dmar_issue_qi_request(struct dmar_drhd_rt *dmar_unit, struct dmar_entry invalidate_desc)
@@ -1228,7 +1209,7 @@ static int32_t remove_iommu_device(const struct iommu_domain *domain, uint16_t s
  * @pre action != NULL
  * As an internal API, VT-d code can guarantee action is not NULL.
  */
-static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
+void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 {
 	struct dmar_drhd_rt *dmar_unit;
 	uint32_t i;
@@ -1240,6 +1221,48 @@ static void do_action_for_iommus(void (*action)(struct dmar_drhd_rt *))
 		} else {
 			dev_dbg(ACRN_DBG_IOMMU, "ignore dmar_unit @0x%x", dmar_unit->drhd->reg_base_addr);
 		}
+	}
+}
+
+/* @brief: Public API access parse DRHD structures
+ * Parses DRHD structures and passes device scope entry details to PCI module
+ * Returns the last DRHD structure index if INCLUDE_PCI_ALL flag is set
+ *
+ * @pre action_on_pci_endpoint != NULL
+ * @pre action_on_pci_sub_hierarchy != NULL
+ * @pre drhd_idx != NULL
+ * @pre platform_dmar_info->drhd_count > 0U
+ */
+void iommu_do_for_each(void (*action_on_pci_endpoint)(union pci_bdf, void *, void *),
+			void (*action_on_pci_sub_hierarchy)(union pci_bdf, void *, void *, void *),
+			void *arg1, void *arg2, uint32_t *drhd_idx)
+{
+	uint32_t index;
+	struct dmar_dev_scope *device, *devices;
+	struct dmar_drhd *drhd = NULL;
+	union pci_bdf bdf;
+
+	for (index = 0U; index < platform_dmar_info->drhd_count; index++) {
+		drhd = dmar_drhd_units[index].drhd;
+		devices = drhd->devices;
+		for (device = &devices[0]; device <= &devices[drhd->dev_cnt - 1U]; device++) {
+			bdf.fields.bus = device->bus;
+			bdf.fields.devfun = device->devfun;
+			if (device->type == ACPI_DMAR_SCOPE_TYPE_ENDPOINT) {
+				action_on_pci_endpoint(bdf, arg1, (void *)(uint64_t) index);
+			} else if (device->type == ACPI_DMAR_SCOPE_TYPE_BRIDGE) {
+				action_on_pci_sub_hierarchy(bdf, arg1, arg2, (void *)(uint64_t) index);
+			} else {
+				/*
+				 * Do nothing for IOAPIC, ACPI namespace and
+				 * MSI Capable HPET device scope
+				 */
+			}
+		}
+	}
+
+	if (drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) {
+		*drhd_idx = platform_dmar_info->drhd_count - 1U;
 	}
 }
 
