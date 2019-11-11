@@ -468,28 +468,27 @@ vioapic_init(struct acrn_vm *vm)
 
 	vioapic_reset(vm);
 
+	vm->arch_vm.vioapic.base_addr = VIOAPIC_BASE;
+	if (is_sos_vm(vm)) {
+		vm->arch_vm.vioapic.nr_pins = REDIR_ENTRIES_HW;
+	} else {
+		vm->arch_vm.vioapic.nr_pins = VIOAPIC_RTE_NUM;
+	}
+
 	register_mmio_emulation_handler(vm,
 			vioapic_mmio_access_handler,
-			(uint64_t)VIOAPIC_BASE,
-			(uint64_t)VIOAPIC_BASE + VIOAPIC_SIZE,
-			vm);
+			(uint64_t)vm->arch_vm.vioapic.base_addr,
+			(uint64_t)vm->arch_vm.vioapic.base_addr + VIOAPIC_SIZE,
+			(void *)&vm->arch_vm.vioapic);
 	ept_del_mr(vm, (uint64_t *)vm->arch_vm.nworld_eptp,
-			(uint64_t)VIOAPIC_BASE, (uint64_t)VIOAPIC_SIZE);
+			(uint64_t)vm->arch_vm.vioapic.base_addr, VIOAPIC_SIZE);
 	vm->arch_vm.vioapic.ready = true;
 }
 
 uint32_t
 vioapic_pincount(const struct acrn_vm *vm)
 {
-	uint32_t ret;
-
-	if (is_sos_vm(vm)) {
-	        ret = REDIR_ENTRIES_HW;
-	} else {
-		ret = VIOAPIC_RTE_NUM;
-	}
-
-	return ret;
+	return vm->arch_vm.vioapic.nr_pins;
 }
 
 /*
