@@ -331,7 +331,7 @@ static void vioapic_indirect_write(struct acrn_vioapic *vioapic, uint32_t addr, 
 			if ((new.bits.intr_mask == IOAPIC_RTE_MASK_CLR) || (last.bits.intr_mask  == IOAPIC_RTE_MASK_CLR)) {
 				/* VM enable intr */
 				/* NOTE: only support max 256 pin */
-				(void)ptirq_intx_pin_remap(vioapic->vm, pin, INTX_CTLR_IOAPIC);
+				(void)ptirq_intx_pin_remap(vioapic->vm, vioapic->index, pin, INTX_CTLR_IOAPIC);
 			}
 
 			/*
@@ -418,7 +418,7 @@ vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
 			continue;
 		}
 
-		ptirq_intx_ack(vm, pin, INTX_CTLR_IOAPIC);
+		ptirq_intx_ack(vm, vioapic->index, pin, INTX_CTLR_IOAPIC);
 	}
 
 	/*
@@ -467,6 +467,7 @@ vioapic_init(struct acrn_vm *vm)
 	vioapic_reset(vm);
 
 	vm->arch_vm.vioapic.base_addr = VIOAPIC_BASE;
+	vm->arch_vm.vioapic.index = VIOAPIC_CTLR_ZERO;
 	if (is_sos_vm(vm)) {
 		vm->arch_vm.vioapic.nr_pins = REDIR_ENTRIES_HW;
 	} else {

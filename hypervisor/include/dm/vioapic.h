@@ -49,12 +49,19 @@
 
 #define IOAPIC_RTE_LOW_INTVEC	((uint32_t)IOAPIC_RTE_INTVEC)
 
+/*
+ * id field is used to emulate the IOAPIC_ID register of vIOAPIC
+ * index field is used to index into the array of vIOAPICs
+ * maintained per VM
+ */
+
 struct acrn_vioapic {
 	struct acrn_vm	*vm;
 	spinlock_t	mtx;
 	uint32_t	base_addr;
 	uint32_t	nr_pins;
 	uint32_t	id;
+	uint8_t		index;
 	bool		ready;
 	uint32_t	ioregsel;
 	union ioapic_rte rtbl[REDIR_ENTRIES_HW];

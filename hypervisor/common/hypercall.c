@@ -909,7 +909,7 @@ int32_t hcall_set_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t pa
 					if ((((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm))) ||
 							((irq.intx.pic_pin) && (irq.intx.virt_pin < vpic_pincount()))) &&
 							ioapic_irq_is_gsi(irq.intx.phys_pin)) {
-						ret = ptirq_add_intx_remapping(target_vm, irq.intx.virt_pin,
+						ret = ptirq_add_intx_remapping(target_vm, 0U, irq.intx.virt_pin,
 							irq.intx.phys_pin, irq.intx.pic_pin);
 					} else {
 						pr_err("%s: Invalid phys pin or virt pin\n", __func__);
@@ -957,7 +957,7 @@ hcall_reset_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t param)
 				if ((vdev != NULL) && (vdev->pdev->bdf.value == irq.phys_bdf)) {
 					if (((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm))) ||
 						((irq.intx.pic_pin) && (irq.intx.virt_pin < vpic_pincount()))) {
-						ptirq_remove_intx_remapping(target_vm, irq.intx.virt_pin, irq.intx.pic_pin);
+						ptirq_remove_intx_remapping(target_vm, 0U, irq.intx.virt_pin, irq.intx.pic_pin);
 						ret = 0;
 					} else {
 						pr_err("%s: Invalid virt pin\n", __func__);
