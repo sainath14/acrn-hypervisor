@@ -18,6 +18,7 @@
 #include <hypercall.h>
 #include <errno.h>
 #include <logmsg.h>
+#include <ioapic.h>
 
 #define ACRN_DBG_HYCALL	6U
 
@@ -934,8 +935,12 @@ int32_t hcall_set_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t pa
 			vpci_set_ptdev_intr_info(target_vm, irq.virt_bdf, irq.phys_bdf);
 
 			if (irq.type == IRQ_INTX) {
-				ret = ptirq_add_intx_remapping(target_vm, irq.is.intx.virt_pin,
-						irq.is.intx.phys_pin, irq.is.intx.pic_pin);
+				if ((((!irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vioapic_pincount(target_vm))) ||
+						((irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vpic_pincount()))) &&
+				   		ioapic_irq_is_gsi(irq.is.intx.phys_pin)) {
+					ret = ptirq_add_intx_remapping(target_vm, irq.is.intx.virt_pin,
+							irq.is.intx.phys_pin, irq.is.intx.pic_pin);
+				}
 			} else if (((irq.type == IRQ_MSI) || (irq.type == IRQ_MSIX)) &&
 					(irq.is.msix.vector_cnt <= CONFIG_MAX_MSIX_TABLE_NUM)) {
 				ret = ptirq_add_msix_remapping(target_vm,
