@@ -60,8 +60,8 @@ struct acrn_vioapic {
 	spinlock_t	mtx;
 	uint32_t	base_addr;
 	uint32_t	nr_pins;
-	uint32_t	id;
 	uint8_t		index;
+	uint32_t	id;
 	bool		ready;
 	uint32_t	ioregsel;
 	union ioapic_rte rtbl[REDIR_ENTRIES_HW];
@@ -92,7 +92,8 @@ void	vioapic_reset(struct acrn_vm *vm);
  *
  * @return None
  */
-void	vioapic_set_irqline_lock(const struct acrn_vm *vm, uint32_t irqline, uint32_t operation);
+void vioapic_set_irqline_lock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32_t irqline,
+				uint32_t operation);
 
 /**
  * @brief Set vIOAPIC IRQ line status.
@@ -108,11 +109,11 @@ void	vioapic_set_irqline_lock(const struct acrn_vm *vm, uint32_t irqline, uint32
  * @pre irqline < vioapic_pincount(vm)
  * @return None
  */
-void	vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint32_t irqline, uint32_t operation);
+void vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32_t irqline, uint32_t operation);
 
-uint32_t	vioapic_pincount(const struct acrn_vm *vm);
+uint32_t	vioapic_pincount(const struct acrn_vm *vm, uint8_t vioapic_index);
 void	vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector);
-void	vioapic_get_rte(struct acrn_vm *vm, uint32_t pin, union ioapic_rte *rte);
+void	vioapic_get_rte(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t pin, union ioapic_rte *rte);
 int32_t	vioapic_mmio_access_handler(struct io_request *io_req, void *handler_private_data);
 
 /**

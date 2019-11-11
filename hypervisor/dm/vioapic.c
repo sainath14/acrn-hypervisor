@@ -130,12 +130,13 @@ vioapic_set_pinstate(struct acrn_vioapic *vioapic, uint32_t pin, uint32_t level)
  * @return None
  */
 void
-vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint32_t irqline, uint32_t operation)
+vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32_t irqline, uint32_t operation)
 {
 	struct acrn_vioapic *vioapic;
 	uint32_t pin = irqline;
 
 	vioapic = vm_ioapic(vm);
+	(void)vioapic_index;
 
 	switch (operation) {
 	case GSI_SET_HIGH:
@@ -174,13 +175,14 @@ vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint32_t irqline, uint32_t 
  * @return None
  */
 void
-vioapic_set_irqline_lock(const struct acrn_vm *vm, uint32_t irqline, uint32_t operation)
+vioapic_set_irqline_lock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32_t irqline, uint32_t operation)
 {
 	uint64_t rflags;
+	(void) vioapic_index;
 	struct acrn_vioapic *vioapic = vm_ioapic(vm);
 	if (vioapic->ready) {
 		spinlock_irqsave_obtain(&(vioapic->mtx), &rflags);
-		vioapic_set_irqline_nolock(vm, irqline, operation);
+		vioapic_set_irqline_nolock(vm, vioapic_index, irqline, operation);
 		spinlock_irqrestore_release(&(vioapic->mtx), rflags);
 	}
 }
@@ -189,7 +191,7 @@ static uint32_t
 vioapic_indirect_read(const struct acrn_vioapic *vioapic, uint32_t addr)
 {
 	uint32_t regnum, ret = 0U;
-	uint32_t pin, pincount = vioapic_pincount(vioapic->vm);
+	uint32_t pin, pincount = vioapic_pincount(vioapic->vm, vioapic->index);
 
 	regnum = addr & 0xffU;
 	switch (regnum) {
@@ -253,7 +255,7 @@ static void vioapic_indirect_write(struct acrn_vioapic *vioapic, uint32_t addr, 
 {
 	union ioapic_rte last, new, changed;
 	uint32_t regnum;
-	uint32_t pin, pincount = vioapic_pincount(vioapic->vm);
+	uint32_t pin, pincount = vioapic_pincount(vioapic->vm, vioapic->index);
 
 	regnum = addr & 0xffUL;
 	switch (regnum) {
@@ -399,7 +401,7 @@ void
 vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
 {
 	struct acrn_vioapic *vioapic;
-	uint32_t pin, pincount = vioapic_pincount(vm);
+	uint32_t pin, pincount = vioapic_pincount(vm, VIOAPIC_CTLR_ZERO);
 	union ioapic_rte rte;
 	uint64_t rflags;
 
@@ -450,7 +452,7 @@ vioapic_reset(struct acrn_vm *vm)
 	struct acrn_vioapic *vioapic = vm_ioapic(vm);
 
 	/* Initialize all redirection entries to mask all interrupts */
-	pincount = vioapic_pincount(vm);
+	pincount = vioapic_pincount(vm, VIOAPIC_CTLR_ZERO);
 	for (pin = 0U; pin < pincount; pin++) {
 		vioapic->rtbl[pin].full = MASK_ALL_INTERRUPTS;
 	}
@@ -485,8 +487,9 @@ vioapic_init(struct acrn_vm *vm)
 }
 
 uint32_t
-vioapic_pincount(const struct acrn_vm *vm)
+vioapic_pincount(const struct acrn_vm *vm, uint8_t vioapic_index)
 {
+	(void) vioapic_index;
 	return vm->arch_vm.vioapic.nr_pins;
 }
 
@@ -525,10 +528,11 @@ int32_t vioapic_mmio_access_handler(struct io_request *io_req, void *handler_pri
  * @pre vm->arch_vm.vioapic != NULL
  * @pre rte != NULL
  */
-void vioapic_get_rte(struct acrn_vm *vm, uint32_t pin, union ioapic_rte *rte)
+void vioapic_get_rte(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t pin, union ioapic_rte *rte)
 {
 	struct acrn_vioapic *vioapic;
 
+	(void) vioapic_index;
 	vioapic = vm_ioapic(vm);
 	*rte = vioapic->rtbl[pin];
 }

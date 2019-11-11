@@ -353,7 +353,7 @@ int32_t hcall_set_irqline(const struct acrn_vm *vm, uint16_t vmid,
 	int32_t ret = -1;
 
 	if (!is_poweroff_vm(target_vm) && is_postlaunched_vm(target_vm)) {
-		if (ops->gsi < vioapic_pincount(vm)) {
+		if (ops->gsi < vioapic_pincount(vm, VIOAPIC_CTLR_ZERO)) {
 			if (ops->gsi < vpic_pincount()) {
 				/*
 				 * IRQ line for 8254 timer is connected to
@@ -365,7 +365,7 @@ int32_t hcall_set_irqline(const struct acrn_vm *vm, uint16_t vmid,
 		        }
 
 			/* handle IOAPIC irqline */
-			vioapic_set_irqline_lock(target_vm, ops->gsi, ops->op);
+			vioapic_set_irqline_lock(target_vm, VIOAPIC_CTLR_ZERO, ops->gsi, ops->op);
 			ret = 0;
 		}
 	}
@@ -906,7 +906,7 @@ int32_t hcall_set_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t pa
 				vdev = pci_find_vdev(vpci, bdf);
 				spinlock_release(&vpci->lock);
 				if ((vdev != NULL) && (vdev->pdev->bdf.value == irq.phys_bdf)) {
-					if ((((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm))) ||
+					if ((((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm, VIOAPIC_CTLR_ZERO))) ||
 							((irq.intx.pic_pin) && (irq.intx.virt_pin < vpic_pincount()))) &&
 							ioapic_irq_is_gsi(irq.intx.phys_pin)) {
 						ret = ptirq_add_intx_remapping(target_vm, 0U, irq.intx.virt_pin,
@@ -955,7 +955,7 @@ hcall_reset_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t param)
 				vdev = pci_find_vdev(vpci, bdf);
 				spinlock_release(&vpci->lock);
 				if ((vdev != NULL) && (vdev->pdev->bdf.value == irq.phys_bdf)) {
-					if (((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm))) ||
+					if (((!irq.intx.pic_pin) && (irq.intx.virt_pin < vioapic_pincount(target_vm, VIOAPIC_CTLR_ZERO))) ||
 						((irq.intx.pic_pin) && (irq.intx.virt_pin < vpic_pincount()))) {
 						ptirq_remove_intx_remapping(target_vm, 0U, irq.intx.virt_pin, irq.intx.pic_pin);
 						ret = 0;

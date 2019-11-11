@@ -170,18 +170,20 @@ ptirq_build_physical_rte(struct acrn_vm *vm, struct ptirq_remapping_info *entry)
 		union ioapic_rte virt_rte;
 		bool phys;
 
-		vioapic_get_rte(vm, virt_sid->intx_id.pin, &virt_rte);
+		vioapic_get_rte(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin, &virt_rte);
 		rte = virt_rte;
 
 		/* init polarity & pin state */
 		if (rte.bits.intr_polarity == IOAPIC_RTE_INTPOL_ALO) {
 			if (entry->polarity == 0U) {
-				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.pin, GSI_SET_HIGH);
+				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_SET_HIGH);
 			}
 			entry->polarity = 1U;
 		} else {
 			if (entry->polarity == 1U) {
-				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.pin, GSI_SET_LOW);
+				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_SET_LOW);
 			}
 			entry->polarity = 0U;
 		}
@@ -440,22 +442,26 @@ static void ptirq_handle_intx(struct acrn_vm *vm,
 		bool trigger_lvl = false;
 
 		/* INTX_CTLR_IOAPIC means we have vioapic enabled */
-		vioapic_get_rte(vm, (uint32_t)virt_sid->intx_id.pin, &rte);
+		vioapic_get_rte(vm, virt_sid->intx_id.ctlr_index, (uint32_t)virt_sid->intx_id.pin, &rte);
 		if (rte.bits.trigger_mode == IOAPIC_RTE_TRGRMODE_LEVEL) {
 			trigger_lvl = true;
 		}
 
 		if (trigger_lvl) {
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_SET_LOW);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_SET_LOW);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_SET_HIGH);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_SET_HIGH);
 			}
 		} else {
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_FALLING_PULSE);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_FALLING_PULSE);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_RAISING_PULSE);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.ctlr_index, virt_sid->intx_id.pin,
+						GSI_RAISING_PULSE);
 			}
 		}
 
@@ -542,9 +548,11 @@ void ptirq_intx_ack(struct acrn_vm *vm, uint8_t ctlr_index, uint32_t virt_pin, e
 		switch (vpin_ctlr) {
 		case INTX_CTLR_IOAPIC:
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_pin, GSI_SET_HIGH);
+				vioapic_set_irqline_lock(vm, ctlr_index, virt_pin,
+						GSI_SET_HIGH);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_pin, GSI_SET_LOW);
+				vioapic_set_irqline_lock(vm, ctlr_index, virt_pin,
+						GSI_SET_LOW);
 			}
 			break;
 		case INTX_CTLR_PIC:

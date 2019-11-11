@@ -215,7 +215,7 @@ static void vpic_notify_intr(struct acrn_vpic *vpic)
 			 * to vioapic pin0 (irq2)
 			 * From MPSpec session 5.1
 			 */
-			vioapic_set_irqline_lock(vpic->vm, 0U, GSI_RAISING_PULSE);
+			vioapic_set_irqline_lock(vpic->vm, VIOAPIC_CTLR_ZERO, 0U, GSI_RAISING_PULSE);
 		}
 	} else {
 		dev_dbg(DBG_LEVEL_PIC,
