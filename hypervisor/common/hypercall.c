@@ -938,7 +938,7 @@ int32_t hcall_set_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t pa
 				if ((((!irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vioapic_pincount(target_vm))) ||
 						((irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vpic_pincount()))) &&
 				   		ioapic_irq_is_gsi(irq.is.intx.phys_pin)) {
-					ret = ptirq_add_intx_remapping(target_vm, irq.is.intx.virt_pin,
+					ret = ptirq_add_intx_remapping(target_vm, 0U, irq.is.intx.virt_pin,
 							irq.is.intx.phys_pin, irq.is.intx.pic_pin);
 				}
 			} else if (((irq.type == IRQ_MSI) || (irq.type == IRQ_MSIX)) &&
@@ -980,7 +980,7 @@ hcall_reset_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t param)
 		} else if (irq.type == IRQ_INTX) {
 			vpci_reset_ptdev_intr_info(target_vm, irq.virt_bdf, irq.phys_bdf);
 			ptirq_remove_intx_remapping(target_vm,
-					irq.is.intx.virt_pin,
+					0U, irq.is.intx.virt_pin,
 					irq.is.intx.pic_pin);
 			ret = 0;
 		} else if (((irq.type == IRQ_MSI) || (irq.type == IRQ_MSIX)) &&

@@ -37,7 +37,7 @@
  * @pre vm != NULL
  *
  */
-void ptirq_intx_ack(struct acrn_vm *vm, uint32_t virt_pin, uint32_t vpin_src);
+void ptirq_intx_ack(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin, uint8_t vpin_src);
 
 /**
  * @brief MSI/MSI-x remapping for passthrough device.
@@ -84,7 +84,7 @@ int32_t ptirq_prepare_msix_remap(struct acrn_vm *vm, uint16_t virt_bdf,  uint16_
  * @pre vm != NULL
  *
  */
-int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint32_t virt_pin, uint32_t vpin_src);
+int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin, uint8_t vpin_src);
 
 /**
  * @brief Add an interrupt remapping entry for INTx as pre-hold mapping.

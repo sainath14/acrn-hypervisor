@@ -55,6 +55,7 @@ struct acrn_vioapic {
 	uint32_t	base_addr;
 	uint32_t	nr_pins;
 	uint32_t	id;
+	uint8_t		index;
 	bool		ready;
 	uint32_t	ioregsel;
 	union ioapic_rte rtbl[REDIR_ENTRIES_HW];
