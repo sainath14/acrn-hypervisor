@@ -353,7 +353,7 @@ int32_t hcall_set_irqline(const struct acrn_vm *vm, uint16_t vmid,
 	int32_t ret = -1;
 
 	if (!is_poweroff_vm(target_vm) && is_postlaunched_vm(target_vm)) {
-		if (ops->gsi < vioapic_pincount(vm)) {
+		if (ops->gsi < vioapic_pincount(vm, 0U)) {
 			if (ops->gsi < vpic_pincount()) {
 				/*
 				 * IRQ line for 8254 timer is connected to
@@ -365,7 +365,7 @@ int32_t hcall_set_irqline(const struct acrn_vm *vm, uint16_t vmid,
 		        }
 
 			/* handle IOAPIC irqline */
-			vioapic_set_irqline_lock(target_vm, ops->gsi, ops->op);
+			vioapic_set_irqline_lock(target_vm, 0U, ops->gsi, ops->op);
 			ret = 0;
 		}
 	}
@@ -935,7 +935,7 @@ int32_t hcall_set_ptdev_intr_info(struct acrn_vm *vm, uint16_t vmid, uint64_t pa
 			vpci_set_ptdev_intr_info(target_vm, irq.virt_bdf, irq.phys_bdf);
 
 			if (irq.type == IRQ_INTX) {
-				if ((((!irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vioapic_pincount(target_vm))) ||
+				if ((((!irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vioapic_pincount(target_vm, 0U))) ||
 						((irq.is.intx.pic_pin) && (irq.is.intx.virt_pin < vpic_pincount()))) &&
 				   		ioapic_irq_is_gsi(irq.is.intx.phys_pin)) {
 					ret = ptirq_add_intx_remapping(target_vm, 0U, irq.is.intx.virt_pin,

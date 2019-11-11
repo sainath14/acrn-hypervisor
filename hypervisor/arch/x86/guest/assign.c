@@ -176,12 +176,14 @@ ptirq_build_physical_rte(struct acrn_vm *vm, struct ptirq_remapping_info *entry)
 		/* init polarity & pin state */
 		if (rte.bits.intr_polarity == IOAPIC_RTE_INTPOL_ALO) {
 			if (entry->polarity == 0U) {
-				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.pin, GSI_SET_HIGH);
+				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_SET_HIGH);
 			}
 			entry->polarity = 1U;
 		} else {
 			if (entry->polarity == 1U) {
-				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.pin, GSI_SET_LOW);
+				vioapic_set_irqline_nolock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_SET_LOW);
 			}
 			entry->polarity = 0U;
 		}
@@ -444,15 +446,19 @@ static void ptirq_handle_intx(struct acrn_vm *vm,
 
 		if (trigger_lvl) {
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_SET_LOW);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_SET_LOW);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_SET_HIGH);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_SET_HIGH);
 			}
 		} else {
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_FALLING_PULSE);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_FALLING_PULSE);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_sid->intx_id.pin, GSI_RAISING_PULSE);
+				vioapic_set_irqline_lock(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin,
+						GSI_RAISING_PULSE);
 			}
 		}
 
@@ -539,9 +545,11 @@ void ptirq_intx_ack(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin
 		switch (vpin_src) {
 		case PTDEV_VPIN_IOAPIC:
 			if (entry->polarity != 0U) {
-				vioapic_set_irqline_lock(vm, virt_pin, GSI_SET_HIGH);
+				vioapic_set_irqline_lock(vm, vioapic_index, virt_pin,
+						GSI_SET_HIGH);
 			} else {
-				vioapic_set_irqline_lock(vm, virt_pin, GSI_SET_LOW);
+				vioapic_set_irqline_lock(vm, vioapic_index, virt_pin,
+						GSI_SET_LOW);
 			}
 			break;
 		case PTDEV_VPIN_PIC:

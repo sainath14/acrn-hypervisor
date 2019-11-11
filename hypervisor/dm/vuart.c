@@ -193,7 +193,7 @@ void vuart_toggle_intr(const struct acrn_vuart *vu)
 	}
 
 	vpic_set_irqline(vm_pic(vu->vm), vu->irq, operation);
-	vioapic_set_irqline_lock(vu->vm, vu->irq, operation);
+	vioapic_set_irqline_lock(vu->vm, 0U, vu->irq, operation);
 }
 
 static bool send_to_target(struct acrn_vuart *vu, uint8_t value_u8)

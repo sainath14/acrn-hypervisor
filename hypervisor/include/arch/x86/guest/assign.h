@@ -106,7 +106,8 @@ int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t
  * @pre vm != NULL
  *
  */
-int32_t ptirq_add_intx_remapping(struct acrn_vm *vm, uint32_t virt_pin, uint32_t phys_pin, bool pic_pin);
+int32_t ptirq_add_intx_remapping(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin,
+					uint32_t phys_pin, bool pic_pin);
 
 /**
  * @brief Remove an interrupt remapping entry for INTx.
@@ -122,7 +123,7 @@ int32_t ptirq_add_intx_remapping(struct acrn_vm *vm, uint32_t virt_pin, uint32_t
  * @pre vm != NULL
  *
  */
-void ptirq_remove_intx_remapping(struct acrn_vm *vm, uint32_t virt_pin, bool pic_pin);
+void ptirq_remove_intx_remapping(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin, bool pic_pin);
 
 /**
  * @brief Add interrupt remapping entry/entries for MSI/MSI-x as pre-hold mapping.
