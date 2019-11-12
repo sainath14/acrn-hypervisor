@@ -52,7 +52,11 @@ union source_id {
 	 * 	a. if ctlr is INTX_CTLR_IOAPIC, ctlr_index indexes into the array of vIOAPICs
 	 * 	   maintained per VM by ACRN
 	 * 	b. if ctlr is INTX_CTLR_PIC, ctlr_index is 0U
-	 * pin indicates the pin number of interrupt controller determined by ctlr
+	 *
+	 * In case of source_id used for physical source id
+	 * 	a.when the number of IO-APICs on the platform is more than 1, pin
+	 * 	  refers to gsi
+	 * 	b.Other wise, pin refers to the pin number of the single IO-APIC
 	 */
 	struct {
 		enum intx_ctlr ctlr:24;

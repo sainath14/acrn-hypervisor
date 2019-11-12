@@ -26,6 +26,8 @@
 #define MAX_STR_SIZE		256U
 #define SHELL_PROMPT_STR	"ACRN:\\>"
 
+#define INVALID_IOAPIC_ID	0xFF
+
 #define SHELL_LOG_BUF_SIZE		(PAGE_SIZE * MAX_PCPU_NUM / 2U)
 static char shell_log_buf[SHELL_LOG_BUF_SIZE];
 
@@ -1054,7 +1056,7 @@ static int32_t shell_show_cpu_int(__unused int32_t argc, __unused char **argv)
 
 static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 		uint32_t *irq, uint32_t *vector, uint64_t *dest, bool *lvl_tm,
-		uint32_t *pin, uint32_t *vpin, uint32_t *bdf, uint32_t *vbdf)
+		uint32_t *gsi, uint8_t *vioapic_index, uint32_t *vpin, uint32_t *bdf, uint32_t *vbdf)
 {
 	if (is_entry_active(entry)) {
 		if (entry->intr_type == PTDEV_INTR_MSI) {
@@ -1065,7 +1067,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 			} else {
 				*lvl_tm = false;
 			}
-			*pin = INVALID_INTERRUPT_PIN;
+			*gsi = INVALID_INTERRUPT_PIN;
+			*vioapic_index = INVALID_IOAPIC_ID;
 			*vpin = INVALID_INTERRUPT_PIN;
 			*bdf = entry->phys_sid.msi_id.bdf;
 			*vbdf = entry->virt_sid.msi_id.bdf;
@@ -1085,7 +1088,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 			} else {
 				*lvl_tm = false;
 			}
-			*pin = entry->phys_sid.intx_id.pin;
+			*gsi = entry->phys_sid.intx_id.pin;
+			*vioapic_index = entry->virt_sid.intx_id.ctlr_index;
 			*vpin = entry->virt_sid.intx_id.pin;
 			*bdf = 0U;
 			*vbdf = 0U;
@@ -1098,7 +1102,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 		*vector = 0U;
 		*dest = 0UL;
 		*lvl_tm = 0;
-		*pin = -1;
+		*gsi = -1;
+		*vioapic_index = -1;
 		*vpin = -1;
 		*bdf = 0U;
 		*vbdf = 0U;
@@ -1115,10 +1120,11 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 	char type[16];
 	uint64_t dest;
 	bool lvl_tm;
-	uint32_t pin, vpin;
+	uint32_t gsi, vpin;
+	uint8_t vioapic_index;
 	union pci_bdf bdf, vbdf;
 
-	len = snprintf(str, size, "\r\nVM\tTYPE\tIRQ\tVEC\tDEST\tTM\tPIN\tVPIN\tBDF\tVBDF");
+	len = snprintf(str, size, "\r\nVM\tTYPE\tIRQ\tVEC\tDEST\tTM\tGSI\tVIOAPIC\tVPIN\tBDF\tVBDF");
 	if (len >= size) {
 		goto overflow;
 	}
@@ -1128,7 +1134,7 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 	for (idx = 0U; idx < CONFIG_MAX_PT_IRQ_ENTRIES; idx++) {
 		entry = &ptirq_entries[idx];
 		if (is_entry_active(entry)) {
-			get_entry_info(entry, type, &irq, &vector, &dest, &lvl_tm, &pin, &vpin,
+			get_entry_info(entry, type, &irq, &vector, &dest, &lvl_tm, &gsi, &vioapic_index, &vpin,
 					(uint32_t *)&bdf, (uint32_t *)&vbdf);
 			len = snprintf(str, size, "\r\n%d\t%s\t%d\t0x%X\t0x%X",
 					entry->vm->vm_id, type, irq, vector, dest);
@@ -1138,9 +1144,9 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 			size -= len;
 			str += len;
 
-			len = snprintf(str, size, "\t%s\t%hhu\t%hhu\t%x:%x.%x\t%x:%x.%x",
+			len = snprintf(str, size, "\t%s\t%hhu\t%hhu\t%hhu\t%x:%x.%x\t%x:%x.%x",
 					is_entry_active(entry) ? (lvl_tm ? "level" : "edge") : "none",
-					pin, vpin, bdf.bits.b, bdf.bits.d, bdf.bits.f,
+					gsi, vioapic_index, vpin, bdf.bits.b, bdf.bits.d, bdf.bits.f,
 					vbdf.bits.b, vbdf.bits.d, vbdf.bits.f);
 			if (len >= size) {
 				goto overflow;

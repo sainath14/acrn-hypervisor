@@ -98,6 +98,11 @@ uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 	return pin_id;
 }
 
+uint32_t get_gsi_from_ioapic_index_pin(uint16_t ioapic_index, uint16_t ioapic_pin)
+{
+	return ioapic_array[ioapic_index].gsi_base + ioapic_pin;
+}
+
 /*
  * @pre irq_num < NR_MAX_GSI
  */
@@ -310,18 +315,12 @@ uint32_t ioapic_gsi_to_pin(uint32_t gsi)
 	return gsi_table_data[gsi].pin;
 }
 
-uint32_t ioapic_pin_to_irq(uint32_t pin)
+/*
+ *@pre ioapic_irq_is_gsi(gsi == true
+ */
+uint32_t ioapic_gsi_to_irq(uint32_t gsi)
 {
-	uint32_t i;
-	uint32_t irq = IRQ_INVALID;
-
-	for (i = 0U; i < ioapic_max_nr_gsi; i++) {
-		if (gsi_table_data[i].pin == pin) {
-			irq = i;
-			break;
-		}
-	}
-	return irq;
+	return gsi;
 }
 
 static void
