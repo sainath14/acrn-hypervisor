@@ -49,8 +49,7 @@
 
 #define IOAPIC_RTE_LOW_INTVEC	((uint32_t)IOAPIC_RTE_INTVEC)
 
-struct acrn_vioapic {
-	struct acrn_vm	*vm;
+struct acrn_vioapic_instance {
 	spinlock_t	mtx;
 	uint32_t	base_addr;
 	uint32_t	nr_pins;
@@ -61,6 +60,12 @@ struct acrn_vioapic {
 	union ioapic_rte rtbl[REDIR_ENTRIES_HW];
 	/* pin_state status bitmap: 1 - high, 0 - low */
 	uint64_t pin_state[STATE_BITMAP_SIZE];
+};
+
+struct acrn_vioapic {
+	struct acrn_vm	*vm;
+	uint16_t ioapic_num;
+	struct acrn_vioapic_instance vioapic_array[CONFIG_MAX_IOAPIC_NUM];
 };
 
 void    vioapic_init(struct acrn_vm *vm);
