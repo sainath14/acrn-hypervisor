@@ -315,6 +315,15 @@ uint32_t ioapic_pin_to_irq(uint32_t pin)
 	return irq;
 }
 
+uint32_t ioapic_gsi_to_irq(uint32_t gsi)
+{
+	uint32_t irq = IRQ_INVALID;
+	if (gsi < ioapic_nr_gsi) {
+		irq = gsi;
+	}
+	return irq;
+}
+
 static void
 ioapic_irq_gsi_mask_unmask(uint32_t irq, bool mask)
 {

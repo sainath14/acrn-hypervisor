@@ -346,13 +346,13 @@ remove_msix_remapping(const struct acrn_vm *vm, uint16_t virt_bdf, uint32_t entr
  */
 static struct ptirq_remapping_info *add_intx_remapping(struct acrn_vm *vm,
 		uint8_t vioapic_index, uint32_t virt_pin,
-		uint32_t phys_pin, bool pic_pin)
+		uint32_t phys_gsi, bool pic_pin)
 {
 	struct ptirq_remapping_info *entry = NULL;
-	DEFINE_IOAPIC_SID(phys_sid, 0U, phys_pin, 0U);
+	DEFINE_IOAPIC_SID(phys_sid, 0U, phys_gsi, 0U);
 	uint32_t vpin_src = pic_pin ? PTDEV_VPIN_PIC : PTDEV_VPIN_IOAPIC;
 	DEFINE_IOAPIC_SID(virt_sid, vioapic_index, virt_pin, vpin_src);
-	uint32_t phys_irq = ioapic_pin_to_irq(phys_pin);
+	uint32_t phys_irq = ioapic_gsi_to_irq(phys_gsi);
 
 	entry = ptirq_lookup_entry_by_sid(PTDEV_INTR_INTX, &phys_sid, NULL);
 	if (entry == NULL) {
@@ -389,7 +389,7 @@ static struct ptirq_remapping_info *add_intx_remapping(struct acrn_vm *vm,
 
 	if (entry != NULL) {
 		dev_dbg(ACRN_DBG_IRQ, "VM%d INTX add pin mapping vpin%d:ppin%d",
-			entry->vm->vm_id, virt_pin, phys_pin);
+			entry->vm->vm_id, virt_pin, phys_gsi);
 	}
 
 	return entry;
@@ -752,13 +752,13 @@ int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t
 
 				/* entry could be updated by above switch check */
 				if (entry == NULL) {
-					uint32_t phys_pin = virt_pin;
+					uint32_t phys_gsi = virt_pin;
 
 					/* fix vPIC pin to correct native IOAPIC pin */
 					if (pic_pin) {
-						phys_pin = get_pic_pin_from_ioapic_pin(virt_pin);
+						phys_gsi = get_pic_pin_from_ioapic_pin(virt_pin);
 					}
-					entry = add_intx_remapping(vm, vioapic_index, virt_pin, phys_pin, pic_pin);
+					entry = add_intx_remapping(vm, vioapic_index, virt_pin, phys_gsi, pic_pin);
 					if (entry == NULL) {
 						pr_err("%s, add intx remapping failed",
 								__func__);
@@ -792,12 +792,12 @@ int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t
  *   vIOAPIC)
  */
 int32_t ptirq_add_intx_remapping(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t virt_pin,
-					uint32_t phys_pin, bool pic_pin)
+					uint32_t phys_gsi, bool pic_pin)
 {
 	struct ptirq_remapping_info *entry;
 
 	spinlock_obtain(&ptdev_lock);
-	entry = add_intx_remapping(vm, vioapic_index, virt_pin, phys_pin, pic_pin);
+	entry = add_intx_remapping(vm, vioapic_index, virt_pin, phys_gsi, pic_pin);
 	spinlock_release(&ptdev_lock);
 
 	return (entry != NULL) ? 0 : -ENODEV;
