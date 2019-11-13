@@ -14,6 +14,7 @@ CPU_INFO_PATH = '/proc/cpuinfo'
 ttys_type = {
     '0': 'PORT',
     '3': 'MMIO',
+    '2': 'MMIO',
 }
 
 
