@@ -644,6 +644,28 @@ void resume_iommu(void);
  */
 int32_t init_iommu(void);
 
+/* @brief: Public API access parse DRHD structures
+ * Parses DRHD structures and passes device scope entry details to PCI module
+ * Returns the last DRHD structure index if INCLUDE_PCI_ALL flag is set
+ *
+ * @on_pci_endpoint_fn[in]		callback function upon finding a
+ * 					ACPI_DMAR_SCOPE_TYPE_ENDPOINT device scope
+ * @on_pci_sub_hierarchy_fn[in]		callback function upon finding a
+ * 					ACPI_DMAR_SCOPE_TYPE_BRIDGE device scope
+ * @arg1[in]				Data to be passed back as an argument to callback function
+ * @arg2[in]				Data to be passed back as an argument to callback function
+ * @drhd_idx[out]			DRHD index of the last DRHD in the DMAR table if the last
+ * 					DRHD has DRHD_FLAG_INCLUDE_PCI_ALL_MASK flag set
+ *
+ * @pre on_pci_endpoint_fn != NULL
+ * @pre on_pci_sub_hierarchy_fn != NULL
+ * @pre drhd_idx != NULL
+ * @pre platform_dmar_info->drhd_count > 0U
+ */
+void iommu_do_for_each(void (*on_pci_endpoint_fn)(union pci_bdf, void *, void *),
+			void (*on_pci_sub_hierarchy_fn)(union pci_bdf, void *, void *, void *),
+			void *arg1, void *arg2, uint32_t *drhd_idx);
+
 /**
  * @brief check the iommu if support cache snoop.
  *
