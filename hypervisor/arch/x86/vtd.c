@@ -21,6 +21,7 @@
 #include <logmsg.h>
 #include <board.h>
 #include <vm_configurations.h>
+#include <pci.h>
 
 #define DBG_IOMMU 0
 
@@ -205,7 +206,7 @@ static inline uint16_t vmid_to_domainid(uint16_t vm_id)
 }
 
 static int32_t dmar_register_hrhd(struct dmar_drhd_rt *dmar_unit);
-static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8_t devfun);
+static struct dmar_drhd_rt *device_to_dmaru(uint8_t bus, uint8_t devfun);
 static int32_t register_hrhd_units(void)
 {
 	struct dmar_drhd_rt *drhd_rt;
@@ -553,37 +554,25 @@ static struct dmar_drhd_rt *ioapic_to_dmaru(uint16_t ioapic_id, union pci_bdf *s
 	return dmar_unit;
 }
 
-static struct dmar_drhd_rt *device_to_dmaru(uint16_t segment, uint8_t bus, uint8_t devfun)
+static struct dmar_drhd_rt *device_to_dmaru(uint8_t bus, uint8_t devfun)
 {
-	struct dmar_drhd_rt *dmar_unit = NULL;
-	uint32_t i, j;
+	struct dmar_drhd_rt *dmaru = NULL;
+	uint16_t bdf = (uint16_t)bus << 8U | devfun;
+	uint32_t index = pci_lookup_drhd_for_pbdf(bdf);
 
-	for (j = 0U; j < platform_dmar_info->drhd_count; j++) {
-		dmar_unit = &dmar_drhd_units[j];
-
-		if (dmar_unit->drhd->segment != segment) {
-			continue;
-		}
-
-		for (i = 0U; i < dmar_unit->drhd->dev_cnt; i++) {
-			if ((dmar_unit->drhd->devices[i].bus == bus) &&
-					(dmar_unit->drhd->devices[i].devfun == devfun)) {
-				break;
-			}
-		}
-
-		/* found exact one or the one which has the same segment number with INCLUDE_PCI_ALL set */
-		if ((i != dmar_unit->drhd->dev_cnt) || ((dmar_unit->drhd->flags & DRHD_FLAG_INCLUDE_PCI_ALL_MASK) != 0U)) {
-			break;
-		}
+	if (index == INVALID_DRHD_INDEX) {
+		pr_fatal("BDF %02x:%02x:%x has no IOMMU\n", bus, devfun >> 3U, devfun & 7U);
+		/*
+		 * pci_lookup_drhd_for_pbdf would return -1U for any of the reasons
+		 * 1) PCI device with bus, devfun does not exist on platform
+		 * 2) ACRN had issues finding the device with bus, devfun during init
+		 * 3) DMAR tables provided by ACPI for this platform are incorrect
+		 */
+	} else {
+		dmaru = &dmar_drhd_units[index];
 	}
 
-	/* not found */
-	if (j == platform_dmar_info->drhd_count) {
-		dmar_unit = NULL;
-	}
-
-	return dmar_unit;
+	return dmaru;
 }
 
 static void dmar_issue_qi_request(struct dmar_drhd_rt *dmar_unit, struct dmar_entry invalidate_desc)
@@ -1049,7 +1038,7 @@ static void dmar_resume(struct dmar_drhd_rt *dmar_unit)
 	dmar_enable_intr_remapping(dmar_unit);
 }
 
-static int32_t add_iommu_device(struct iommu_domain *domain, uint16_t segment, uint8_t bus, uint8_t devfun)
+static int32_t add_iommu_device(struct iommu_domain *domain, uint8_t bus, uint8_t devfun)
 {
 	struct dmar_drhd_rt *dmar_unit;
 	struct dmar_entry *root_table;
@@ -1066,7 +1055,7 @@ static int32_t add_iommu_device(struct iommu_domain *domain, uint16_t segment, u
 	sid.fields.bus = bus;
 	sid.fields.devfun = devfun;
 
-	dmar_unit = device_to_dmaru(segment, bus, devfun);
+	dmar_unit = device_to_dmaru(bus, devfun);
 	if (dmar_unit == NULL) {
 		pr_err("no dmar unit found for device: %x:%x.%x", bus, sid.bits.d, sid.bits.f);
 		ret = -EINVAL;
@@ -1164,7 +1153,7 @@ static int32_t add_iommu_device(struct iommu_domain *domain, uint16_t segment, u
 	return ret;
 }
 
-static int32_t remove_iommu_device(const struct iommu_domain *domain, uint16_t segment, uint8_t bus, uint8_t devfun)
+static int32_t remove_iommu_device(const struct iommu_domain *domain, uint8_t bus, uint8_t devfun)
 {
 	struct dmar_drhd_rt *dmar_unit;
 	struct dmar_entry *root_table;
@@ -1176,7 +1165,7 @@ static int32_t remove_iommu_device(const struct iommu_domain *domain, uint16_t s
 	union pci_bdf sid;
 	int32_t ret = 0;
 
-	dmar_unit = device_to_dmaru(segment, bus, devfun);
+	dmar_unit = device_to_dmaru(bus, devfun);
 
 	sid.fields.bus = bus;
 	sid.fields.devfun = devfun;
@@ -1302,11 +1291,11 @@ int32_t move_pt_device(const struct iommu_domain *from_domain, struct iommu_doma
 
 	if (bus_local < CONFIG_IOMMU_BUS_NUM) {
 		if (from_domain != NULL) {
-			status = remove_iommu_device(from_domain, 0U, bus, devfun);
+			status = remove_iommu_device(from_domain, bus, devfun);
 		}
 
 		if ((status == 0) && (to_domain != NULL)) {
-			status = add_iommu_device(to_domain, 0U, bus, devfun);
+			status = add_iommu_device(to_domain, bus, devfun);
 		}
 	} else {
 		status = -EINVAL;
@@ -1373,7 +1362,7 @@ int32_t dmar_assign_irte(struct intr_source intr_src, union dmar_ir_entry irte, 
 	int32_t ret = 0;
 
 	if (intr_src.is_msi) {
-		dmar_unit = device_to_dmaru(0U, (uint8_t)intr_src.src.msi.bits.b, intr_src.src.msi.fields.devfun);
+		dmar_unit = device_to_dmaru((uint8_t)intr_src.src.msi.bits.b, intr_src.src.msi.fields.devfun);
 		sid.value = intr_src.src.msi.value;
 		trigger_mode = 0x0UL;
 	} else {
@@ -1417,7 +1406,7 @@ void dmar_free_irte(struct intr_source intr_src, uint16_t index)
 	union pci_bdf sid;
 
 	if (intr_src.is_msi) {
-		dmar_unit = device_to_dmaru(0U, (uint8_t)intr_src.src.msi.bits.b, intr_src.src.msi.fields.devfun);
+		dmar_unit = device_to_dmaru((uint8_t)intr_src.src.msi.bits.b, intr_src.src.msi.fields.devfun);
 	} else {
 		dmar_unit = ioapic_to_dmaru(intr_src.src.ioapic_id, &sid);
 	}
