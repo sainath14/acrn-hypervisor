@@ -205,6 +205,9 @@ struct pci_msix_cap {
 };
 
 struct pci_pdev {
+	/* IOMMU responsible for DMA and Interrupt Remapping for this device */
+	uint32_t drhd_index;
+
 	/* The bar info of the physical PCI device. */
 	uint32_t nr_bars; /* 6 for normal device, 2 for bridge, 1 for cardbus */
 
@@ -283,7 +286,54 @@ uint32_t pci_pdev_read_cfg(union pci_bdf bdf, uint32_t offset, uint32_t bytes);
 void pci_pdev_write_cfg(union pci_bdf bdf, uint32_t offset, uint32_t bytes, uint32_t val);
 void enable_disable_pci_intx(union pci_bdf bdf, bool enable);
 
+/*
+ * @brief Walks the PCI heirarchy and initializes array of pci_pdev structs
+ * Uses DRHD info from ACPI DMAR tables to cover the endpoints and
+ * bridges along with their hierarchy captured in the device scope entries
+ * Walks through rest of the devices starting at bus 0 and thru PCI_BUSMAX
+ */
 void init_pci_pdev_list(void);
+
+/* @brief: Find the DRHD index corresponding to a PCI device
+ * Runs through the pci_pdev_array and returns the value in drhd_idx
+ * member from pdev strucutre that matches matches B:D.F
+ *
+ * @pbdf[in]	B:D.F of a PCI device
+ *
+ * @return if there is a matching pbdf in pci_pdev_array, pdev->drhd_idx, else -1U
+ */
+uint32_t pci_lookup_drhd_for_pbdf(uint16_t pbdf);
+
+static inline bool is_pci_vendor_valid(uint32_t vendor_id)
+{
+	return !((vendor_id == 0xFFFFFFFFU) || (vendor_id == 0U) ||
+		 (vendor_id == 0xFFFF0000U) || (vendor_id == 0xFFFFU));
+}
+
+static inline uint32_t read_pci_pdev_cfg_vendor(union pci_bdf pbdf)
+{
+	return pci_pdev_read_cfg(pbdf, PCIR_VENDOR, 2U);
+}
+
+static inline uint8_t read_pci_pdev_cfg_headertype(union pci_bdf pbdf)
+{
+	return (uint8_t)pci_pdev_read_cfg(pbdf, PCIR_HDRTYPE, 1U);
+}
+
+static inline uint8_t read_pci_pdev_cfg_secbus(union pci_bdf pbdf)
+{
+	return (uint8_t)pci_pdev_read_cfg(pbdf, PCIR_SECBUS_1, 1U);
+}
+
+static inline bool is_pci_cfg_multifunction(uint8_t header_type)
+{
+	return ((header_type & PCIM_MFDEV) == PCIM_MFDEV);
+}
+
+static inline bool is_pci_cfg_bridge(uint8_t header_type)
+{
+	return ((header_type & PCIM_HDRTYPE) == PCIM_HDRTYPE_BRIDGE);
+}
 
 
 #endif /* PCI_H_ */
