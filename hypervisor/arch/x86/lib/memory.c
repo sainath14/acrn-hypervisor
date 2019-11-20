@@ -4,12 +4,18 @@
  */
 #include <types.h>
 
-static inline void memcpy_erms(void *d, const void *s, size_t slen)
+static void __attribute__ ((noinline)) memcpy_erms(void *d, const void *s, size_t slen)
 {
-	asm volatile ("rep; movsb"
-		: "=&D"(d), "=&S"(s)
-		: "c"(slen), "0" (d), "1" (s)
-		: "memory");
+
+	asm volatile (" mov %0, %%ecx\n\t"
+			"shr $3, %%ecx\n\t"
+			"rep; movsq\n\t"
+			"mov %0, %%ecx\n\t"
+			"andl $7, %%ecx\n\t"
+			"rep; movsb\n\t"
+			:
+			: "r"(slen), "D" (d), "S" (s)
+			: "memory");
 }
 
 /*
