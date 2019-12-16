@@ -757,6 +757,8 @@ int32_t ptirq_intx_pin_remap(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t
 					/* fix vPIC pin to correct native IOAPIC pin */
 					if (pic_pin) {
 						phys_gsi = get_pic_pin_from_ioapic_pin(virt_pin);
+					} else {
+						phys_gsi = get_gsi_from_ioapic_index_pin(vioapic_index, virt_pin);
 					}
 					entry = add_intx_remapping(vm, vioapic_index, virt_pin, phys_gsi, pic_pin);
 					if (entry == NULL) {
