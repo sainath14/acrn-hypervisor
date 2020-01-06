@@ -100,5 +100,6 @@ void *ioapic_get_gsi_irq_addr(uint32_t irq_num);
 uint32_t ioapic_get_nr_gsi(void);
 uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index);
 bool ioapic_is_pin_valid(uint32_t pin);
-
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info);
+uint32_t get_gsi_from_ioapic_index_pin(uint16_t ioapic_index, uint16_t ioapic_pin);
 #endif /* IOAPIC_H */

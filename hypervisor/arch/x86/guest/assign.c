@@ -170,7 +170,7 @@ ptirq_build_physical_rte(struct acrn_vm *vm, struct ptirq_remapping_info *entry)
 		union ioapic_rte virt_rte;
 		bool phys;
 
-		vioapic_get_rte(vm, virt_sid->intx_id.pin, &virt_rte);
+		vioapic_get_rte(vm, virt_sid->intx_id.index, virt_sid->intx_id.pin, &virt_rte);
 		rte = virt_rte;
 
 		/* init polarity & pin state */
@@ -379,7 +379,7 @@ static struct ptirq_remapping_info *add_intx_remapping(struct acrn_vm *vm,
 			entry->polarity = 0U;
 		} else {
 			pr_err("INTX pin%d already in vm%d with vpin%d, not able to add into vm%d with vpin%d",
-					phys_pin, entry->vm->vm_id, entry->virt_sid.intx_id.pin, vm->vm_id, virt_pin);
+					phys_gsi, entry->vm->vm_id, entry->virt_sid.intx_id.pin, vm->vm_id, virt_pin);
 			entry = NULL;
 		}
 	} else {
@@ -439,7 +439,7 @@ static void ptirq_handle_intx(struct acrn_vm *vm,
 		bool trigger_lvl = false;
 
 		/* VPIN_IOAPIC src means we have vioapic enabled */
-		vioapic_get_rte(vm, (uint32_t)virt_sid->intx_id.pin, &rte);
+		vioapic_get_rte(vm, virt_sid->intx_id.index, (uint32_t)virt_sid->intx_id.pin, &rte);
 		if (rte.bits.trigger_mode == IOAPIC_RTE_TRGRMODE_LEVEL) {
 			trigger_lvl = true;
 		}

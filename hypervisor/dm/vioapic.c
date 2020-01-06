@@ -36,6 +36,7 @@
 #include <ept.h>
 #include <assign.h>
 #include <logmsg.h>
+#include <ioapic.h>
 
 #define	RTBL_RO_BITS	((uint32_t)0x00004000U | (uint32_t)0x00001000U) /*Remote IRR and Delivery Status bits*/
 
@@ -187,7 +188,7 @@ vioapic_set_irqline_lock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32
 }
 
 static uint32_t
-vioapic_indirect_read(const struct acrn_vioapic *vioapic, uint32_t addr)
+vioapic_indirect_read(const struct acrn_vioapic_instance *vioapic, uint32_t addr)
 {
 	uint32_t regnum, ret = 0U;
 	uint32_t pin, pincount = vioapic_pincount(vioapic->vm, vioapic->index);
@@ -229,7 +230,7 @@ vioapic_indirect_read(const struct acrn_vioapic *vioapic, uint32_t addr)
 	return ret;
 }
 
-static inline bool vioapic_need_intr(const struct acrn_vioapic *vioapic, uint16_t pin)
+static inline bool vioapic_need_intr(const struct acrn_vioapic_instance *vioapic, uint16_t pin)
 {
 	uint32_t lvl;
 	union ioapic_rte rte;
@@ -252,7 +253,7 @@ static inline bool vioapic_need_intr(const struct acrn_vioapic *vioapic, uint16_
  * spinlock_irqsave_obtain(&(vioapic->mtx), &rflags) & spinlock_irqrestore_release(&(vioapic->mtx), rflags)
  * by caller.
  */
-static void vioapic_indirect_write(struct acrn_vioapic *vioapic, uint32_t addr, uint32_t data)
+static void vioapic_indirect_write(struct acrn_vioapic_instance *vioapic, uint32_t addr, uint32_t data)
 {
 	union ioapic_rte last, new, changed;
 	uint32_t regnum;
@@ -354,7 +355,7 @@ static void vioapic_indirect_write(struct acrn_vioapic *vioapic, uint32_t addr, 
 }
 
 static void
-vioapic_mmio_rw(struct acrn_vioapic *vioapic, uint64_t gpa,
+vioapic_mmio_rw(struct acrn_vioapic_instance *vioapic, uint64_t gpa,
 		uint32_t *data, bool do_read)
 {
 	uint32_t offset;
@@ -394,15 +395,15 @@ vioapic_mmio_rw(struct acrn_vioapic *vioapic, uint64_t gpa,
 	spinlock_irqrestore_release(&(vioapic->mtx), rflags);
 }
 
+
 /*
  * @pre vm != NULL
  * @pre vioapic->ready == true
  */
 void
-vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
+vioapic_process_eoi(struct acrn_vioapic_instance *vioapic, uint32_t vector)
 {
-	struct acrn_vioapic *vioapic;
-	uint32_t pin, pincount = vioapic_pincount(vm, 0U);
+	uint32_t pin, pincount = vioapic->nr_pins;
 	union ioapic_rte rte;
 	uint64_t rflags;
 
@@ -410,7 +411,6 @@ vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
 		pr_err("vioapic_process_eoi: invalid vector %u", vector);
 	}
 
-	vioapic = vm_ioapic(vm);
 	dev_dbg(ACRN_DBG_IOAPIC, "ioapic processing eoi for vector %u", vector);
 
 	/* notify device to ack if assigned pin */
@@ -421,7 +421,7 @@ vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
 			continue;
 		}
 
-		ptirq_intx_ack(vm, vioapic->index, pin, PTDEV_VPIN_IOAPIC);
+		ptirq_intx_ack(vioapic->vm, vioapic->index, pin, PTDEV_VPIN_IOAPIC);
 	}
 
 	/*
@@ -446,12 +446,27 @@ vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
 	spinlock_irqrestore_release(&(vioapic->mtx), rflags);
 }
 
+void vm_vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector)
+{
+	struct acrn_vioapic_instance *vioapic;
+	uint16_t vioapic_index;
+	if (is_sos_vm(vm)){
+		for (vioapic_index = 0U; vioapic_index < vm->arch_vm.vioapic.ioapic_num; vioapic_index++) {
+			vioapic = &(vm_ioapic(vm)->vioapic_array[vioapic_index]);
+			vioapic_process_eoi(vioapic, vector);
+		}	
+	} else {
+		vioapic = &(vm_ioapic(vm)->vioapic_array[0U]);
+		vioapic_process_eoi(vioapic, vector);
+	}
+}
+
 static void vioapic_reset_vioapic(struct acrn_vioapic_instance *vioapic)
 {
 	uint32_t pin, pincount;
 
 	/* Initialize all redirection entries to mask all interrupts */
-	pincount = vioapic_pincount(vm, vioapic->index);
+	pincount = vioapic->nr_pins;
 	for (pin = 0U; pin < pincount; pin++) {
 		vioapic->rtbl[pin].full = MASK_ALL_INTERRUPTS;
 	}
@@ -466,7 +481,7 @@ vioapic_reset(struct acrn_vm *vm)
 	uint16_t vioapic_index;
 
 	for (vioapic_index = 0U; vioapic_index < vioapic->ioapic_num; vioapic_index++) {
-		vioapic_reset_vioapic(vioapic->vioapic_array[vioapic_index];
+		vioapic_reset_vioapic(&vioapic->vioapic_array[vioapic_index]);
 	}
 }
 
@@ -477,8 +492,6 @@ vioapic_init(struct acrn_vm *vm)
 	uint16_t platform_ioapic_num;
 	uint16_t vioapic_index;
 
-	vm->arch_vm.vioapic.vm = vm;
-
 	if (is_sos_vm(vm)) {
 		platform_ioapic_num = get_platform_ioapic_info(&platform_ioapic_info);
 		vm->arch_vm.vioapic.ioapic_num = platform_ioapic_num;
@@ -487,9 +500,10 @@ vioapic_init(struct acrn_vm *vm)
 			vm->arch_vm.vioapic.vioapic_array[vioapic_index].nr_pins =
 						platform_ioapic_info[vioapic_index].nr_pins;
 			vm->arch_vm.vioapic.vioapic_array[vioapic_index].base_addr =
-						platform_ioapic_info[vioapic_index].base_addr;
+						platform_ioapic_info[vioapic_index].addr;
 			vm->arch_vm.vioapic.vioapic_array[vioapic_index].index =
 						vioapic_index;
+			vm->arch_vm.vioapic.vioapic_array[vioapic_index].vm = vm;
 			vioapic_reset_vioapic(&vm->arch_vm.vioapic.vioapic_array[vioapic_index]);
 
 			register_mmio_emulation_handler(vm,
@@ -509,6 +523,7 @@ vioapic_init(struct acrn_vm *vm)
 		vm->arch_vm.vioapic.vioapic_array[0U].nr_pins = VIOAPIC_RTE_NUM;
 		vm->arch_vm.vioapic.vioapic_array[0U].base_addr = VIOAPIC_BASE;
 		vm->arch_vm.vioapic.vioapic_array[0U].index = 0U;
+		vm->arch_vm.vioapic.vioapic_array[0U].vm = vm;
 		vioapic_reset_vioapic(&vm->arch_vm.vioapic.vioapic_array[0U]);
 
 
@@ -535,7 +550,7 @@ vioapic_pincount(const struct acrn_vm *vm, uint8_t vioapic_index)
  */
 int32_t vioapic_mmio_access_handler(struct io_request *io_req, void *handler_private_data)
 {
-	struct acrn_vioapic *vioapic = (struct acrn_vioapic *)handler_private_data;
+	struct acrn_vioapic_instance *vioapic = (struct acrn_vioapic_instance *)handler_private_data;
 	struct mmio_request *mmio = &io_req->reqs.mmio;
 	uint64_t gpa = mmio->address;
 	int32_t ret = 0;
@@ -564,10 +579,10 @@ int32_t vioapic_mmio_access_handler(struct io_request *io_req, void *handler_pri
  * @pre vm->arch_vm.vioapic != NULL
  * @pre rte != NULL
  */
-void vioapic_get_rte(struct acrn_vm *vm, uint32_t pin, union ioapic_rte *rte)
+void vioapic_get_rte(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t pin, union ioapic_rte *rte)
 {
-	struct acrn_vioapic *vioapic;
+	struct acrn_vioapic_instance *vioapic;
 
-	vioapic = vm_ioapic(vm);
+	vioapic = &(vm_ioapic(vm)->vioapic_array[vioapic_index]);
 	*rte = vioapic->rtbl[pin];
 }

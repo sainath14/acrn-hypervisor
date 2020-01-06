@@ -89,6 +89,12 @@ static const uint32_t pic_ioapic_pin_map[NR_LEGACY_PIN] = {
 static struct ioapic_info ioapic_array[CONFIG_MAX_IOAPIC_NUM];
 static uint16_t ioapic_num;
 
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info)
+{
+	*plat_ioapic_info = ioapic_array;
+	return ioapic_num;
+}
+
 uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 {
 	uint32_t pin_id = INVALID_INTERRUPT_PIN;
