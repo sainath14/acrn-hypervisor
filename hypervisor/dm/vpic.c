@@ -215,7 +215,7 @@ static void vpic_notify_intr(struct acrn_vpic *vpic)
 			 * to vioapic pin0 (irq2)
 			 * From MPSpec session 5.1
 			 */
-			vioapic_set_irqline_lock(vpic->vm, 0U, GSI_RAISING_PULSE);
+			vioapic_set_irqline_lock(vpic->vm, 0U, 0U, GSI_RAISING_PULSE);
 		}
 	} else {
 		dev_dbg(ACRN_DBG_PIC,
@@ -342,7 +342,7 @@ static int32_t vpic_ocw1(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 
 			virt_pin = (master_pic(vpic, i8259)) ?
 					pin : (pin + 8U);
-			(void)ptirq_intx_pin_remap(vpic->vm, virt_pin, PTDEV_VPIN_PIC);
+			(void)ptirq_intx_pin_remap(vpic->vm, 0U, virt_pin, PTDEV_VPIN_PIC);
 		}
 		pin = (pin + 1U) & 0x7U;
 	}
@@ -378,7 +378,7 @@ static int32_t vpic_ocw2(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 
 		/* if level ack PTDEV */
 		if ((i8259->elc & (1U << (isr_bit & 0x7U))) != 0U) {
-			ptirq_intx_ack(vpic->vm, (master_pic(vpic, i8259) ? isr_bit : isr_bit + 8U),
+			ptirq_intx_ack(vpic->vm, 0U, (master_pic(vpic, i8259) ? isr_bit : isr_bit + 8U),
 					PTDEV_VPIN_PIC);
 		}
 	} else if (((val & OCW2_SL) != 0U) && i8259->rotate) {

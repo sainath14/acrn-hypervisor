@@ -21,8 +21,8 @@
 #define DEFINE_MSI_SID(name, a, b)	\
 union source_id (name) = {.msi_id = {.bdf = (a), .entry_nr = (b)} }
 
-#define DEFINE_IOAPIC_SID(name, a, b)	\
-union source_id (name) = {.intx_id = {.pin = (a), .src = (b)} }
+#define DEFINE_IOAPIC_SID(name, a, b, c)	\
+union source_id (name) = {.intx_id = {.index = (a), .pin = (b), .src = (c)} }
 
 union irte_index {
 	uint16_t index;
@@ -40,8 +40,10 @@ union source_id {
 		uint32_t reserved;
 	} msi_id;
 	struct {
+		uint8_t src;
+		uint8_t index;
+		uint16_t reserved;
 		uint32_t pin;
-		uint32_t src;
 	} intx_id;
 };
 

@@ -1176,10 +1176,10 @@ static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
 	size -= len;
 	str += len;
 
-	pincount = vioapic_pincount(vm);
+	pincount = vioapic_pincount(vm, 0U);
 	rte.full = 0UL;
 	for (pin = 0U; pin < pincount; pin++) {
-		vioapic_get_rte(vm, pin, &rte);
+		vioapic_get_rte(vm, 0U, pin, &rte);
 		mask = (rte.bits.intr_mask == IOAPIC_RTE_MASK_SET);
 		remote_irr = (rte.bits.remote_irr == IOAPIC_RTE_REM_IRR);
 		phys = (rte.bits.dest_mode == IOAPIC_RTE_DESTMODE_PHY);

@@ -89,6 +89,12 @@ static const uint32_t pic_ioapic_pin_map[NR_LEGACY_PIN] = {
 static struct ioapic_info ioapic_array[CONFIG_MAX_IOAPIC_NUM];
 static uint16_t ioapic_num;
 
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info)
+{
+	*plat_ioapic_info = ioapic_array;
+	return ioapic_num;
+}
+
 uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 {
 	uint32_t pin_id = INVALID_INTERRUPT_PIN;
@@ -96,6 +102,12 @@ uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 		pin_id = pic_ioapic_pin_map[pin_index];
 	}
 	return pin_id;
+}
+
+uint32_t get_gsi_from_ioapic_index_pin(uint16_t ioapic_index, uint16_t ioapic_pin)
+{
+
+	return ioapic_array[ioapic_index].gsi_base + ioapic_pin;
 }
 
 /*
@@ -311,6 +323,15 @@ uint32_t ioapic_pin_to_irq(uint32_t pin)
 			irq = i;
 			break;
 		}
+	}
+	return irq;
+}
+
+uint32_t ioapic_gsi_to_irq(uint32_t gsi)
+{
+	uint32_t irq = IRQ_INVALID;
+	if (gsi < ioapic_nr_gsi) {
+		irq = gsi;
 	}
 	return irq;
 }
