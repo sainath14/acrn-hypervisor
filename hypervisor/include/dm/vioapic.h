@@ -55,9 +55,9 @@
  * maintained per VM
  */
 
-struct acrn_vioapic {
-	struct acrn_vm	*vm;
+struct acrn_vioapic_instance {
 	spinlock_t	mtx;
+	struct acrn_vm  *vm;
 	uint32_t	base_addr;
 	uint32_t	nr_pins;
 	uint8_t		index;
@@ -69,6 +69,12 @@ struct acrn_vioapic {
 	uint64_t pin_state[STATE_BITMAP_SIZE];
 };
 
+struct acrn_vioapic {
+	uint16_t ioapic_num;
+	struct acrn_vioapic_instance vioapic_array[CONFIG_MAX_IOAPIC_NUM];
+};
+
+void dump_vioapic(struct acrn_vm *vm);
 void    vioapic_init(struct acrn_vm *vm);
 void	vioapic_reset(struct acrn_vm *vm);
 
@@ -112,7 +118,7 @@ void vioapic_set_irqline_lock(const struct acrn_vm *vm, uint8_t vioapic_index, u
 void vioapic_set_irqline_nolock(const struct acrn_vm *vm, uint8_t vioapic_index, uint32_t irqline, uint32_t operation);
 
 uint32_t	vioapic_pincount(const struct acrn_vm *vm, uint8_t vioapic_index);
-void	vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector);
+void	vm_vioapic_process_eoi(struct acrn_vm *vm, uint32_t vector);
 void	vioapic_get_rte(struct acrn_vm *vm, uint8_t vioapic_index, uint32_t pin, union ioapic_rte *rte);
 int32_t	vioapic_mmio_access_handler(struct io_request *io_req, void *handler_private_data);
 

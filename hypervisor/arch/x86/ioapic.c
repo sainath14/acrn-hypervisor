@@ -98,6 +98,12 @@ uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 	return pin_id;
 }
 
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info)
+{
+	*plat_ioapic_info = ioapic_array;
+	return ioapic_num;
+}
+
 uint32_t get_gsi_from_ioapic_index_pin(uint16_t ioapic_index, uint16_t ioapic_pin)
 {
 	return ioapic_array[ioapic_index].gsi_base + ioapic_pin;
