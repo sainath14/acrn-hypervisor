@@ -26,6 +26,10 @@ uint32_t ioapic_irq_to_pin(uint32_t irq);
 int32_t init_ioapic_id_info(void);
 uint8_t ioapic_irq_to_ioapic_id(uint32_t irq);
 
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info);
+
+uint32_t get_gsi_from_ioapic_index_pin(uint16_t ioapic_index, uint16_t ioapic_pin);
+
 /**
  * @defgroup ioapic_ext_apis IOAPIC External Interfaces
  *
@@ -43,6 +47,7 @@ uint8_t ioapic_irq_to_ioapic_id(uint32_t irq);
  */
 uint32_t ioapic_pin_to_irq(uint32_t pin);
 
+uint32_t ioapic_gsi_to_irq(uint32_t gsi);
 /**
  * @brief Set the redirection table entry
  *
