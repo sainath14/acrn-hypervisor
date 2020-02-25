@@ -20,7 +20,7 @@
 #define NR_MAX_GSI		(CONFIG_MAX_IOAPIC_NUM * CONFIG_MAX_IOAPIC_LINES)
 
 static struct gsi_table gsi_table_data[NR_MAX_GSI];
-static uint32_t ioapic_nr_gsi;
+static uint32_t ioapic_max_nr_gsi;
 static spinlock_t ioapic_lock;
 
 static union ioapic_rte saved_rte[CONFIG_MAX_IOAPIC_NUM][CONFIG_MAX_IOAPIC_LINES];
@@ -101,15 +101,14 @@ uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index)
 /*
  * @pre irq_num < NR_MAX_GSI
  */
-void *ioapic_get_gsi_irq_addr(uint32_t irq_num)
+void *ioapic_get_gsi_addr(uint32_t irq_num)
 {
-
 	return gsi_table_data[irq_num].addr;
 }
 
 uint32_t ioapic_get_nr_gsi(void)
 {
-	return ioapic_nr_gsi;
+	return ioapic_max_nr_gsi;
 }
 
 static void *map_ioapic(uint64_t ioapic_paddr)
@@ -278,27 +277,37 @@ void ioapic_set_rte(uint32_t irq, union ioapic_rte rte)
 	}
 }
 
+/*
+ * IO-APIC gsi and irq are identity mapped in ioapic_setup_irqs
+ */
+
 bool ioapic_irq_is_gsi(uint32_t irq)
 {
-	return irq < ioapic_nr_gsi;
-}
-
-uint32_t ioapic_irq_to_pin(uint32_t irq)
-{
-	uint32_t ret;
-
-	if (ioapic_irq_is_gsi(irq)) {
-		ret = gsi_table_data[irq].pin;
-	} else {
-		ret = INVALID_INTERRUPT_PIN;
+	bool ret = false;
+	uint32_t gsi = irq;
+	if (gsi < NR_MAX_GSI) {
+		ret = gsi_table_data[gsi].is_available;
 	}
 
 	return ret;
 }
 
-bool ioapic_is_pin_valid(uint32_t pin)
+/*
+ * @pre gsi < NR_MAX_GSI
+ */
+bool ioapic_is_gsi_available(uint32_t gsi)
 {
-	return (pin != INVALID_INTERRUPT_PIN);
+	return gsi_table_data[gsi].is_available;
+}
+
+/*
+ *@pre gsi < NR_MAX_GSI
+ *@pre ioapic_is_gsi_available(gsi) == true 
+ */
+
+uint32_t ioapic_gsi_to_pin(uint32_t gsi)
+{
+	return gsi_table_data[gsi].pin;
 }
 
 uint32_t ioapic_pin_to_irq(uint32_t pin)
@@ -306,7 +315,7 @@ uint32_t ioapic_pin_to_irq(uint32_t pin)
 	uint32_t i;
 	uint32_t irq = IRQ_INVALID;
 
-	for (i = 0U; i < ioapic_nr_gsi; i++) {
+	for (i = 0U; i < ioapic_max_nr_gsi; i++) {
 		if (gsi_table_data[i].pin == pin) {
 			irq = i;
 			break;
@@ -452,7 +461,9 @@ void ioapic_setup_irqs(void)
 		addr = map_ioapic(ioapic_array[ioapic_id].addr);
 
 		nr_pins = ioapic_array[ioapic_id].nr_pins;
+		gsi = ioapic_array[ioapic_id].gsi_base;
 		for (pin = 0U; pin < nr_pins; pin++) {
+			gsi_table_data[gsi].is_available = true;
 			gsi_table_data[gsi].ioapic_id = ioapic_array[ioapic_id].id;
 			gsi_table_data[gsi].addr = addr;
 
@@ -490,7 +501,7 @@ void ioapic_setup_irqs(void)
 	}
 
 	/* system max gsi numbers */
-	ioapic_nr_gsi = gsi;
+	ioapic_max_nr_gsi = gsi;
 }
 
 void suspend_ioapic(void)
