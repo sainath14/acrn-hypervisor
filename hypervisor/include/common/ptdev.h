@@ -24,8 +24,8 @@ enum intx_ctlr {
 #define DEFINE_MSI_SID(name, a, b)	\
 union source_id (name) = {.msi_id = {.bdf = (a), .entry_nr = (b)} }
 
-#define DEFINE_INTX_SID(name, a, b)	\
-union source_id (name) = {.intx_id = {.pin = (a), .ctlr = (b)} }
+#define DEFINE_INTX_SID(name, a, b, c)	\
+union source_id (name) = {.intx_id = {.ctlr_index = (a), .pin = (b), .ctlr = (c)} }
 
 union irte_index {
 	uint16_t index;
@@ -45,10 +45,22 @@ union source_id {
 	} msi_id;
 	/*
 	 * ctlr indicates if the source of interrupt is IO-APIC or PIC
-	 * pin indicates the pin number of interrupt controller determined by ctlr
+	 * ctlr_index indicates the IO-APIC or PIC index, in case multiple of them exists
+	 * In case of source_id used for physical source id
+	 * 	a. ctlr is INTX_CTLR_IOAPIC and ctlr_index is 0U
+	 * In case of source_id is used for virtual source id
+	 * 	a. if ctlr is INTX_CTLR_IOAPIC, ctlr_index indexes into the array of vIOAPICs
+	 * 	   maintained per VM by ACRN
+	 * 	b. if ctlr is INTX_CTLR_PIC, ctlr_index is 0U
+	 *
+	 * In case of source_id used for physical source id
+	 * 	a.when the number of IO-APICs on the platform is more than 1, pin
+	 * 	  refers to gsi
+	 * 	b.Other wise, pin refers to the pin number of the single IO-APIC
 	 */
 	struct {
-		enum intx_ctlr ctlr;
+		enum intx_ctlr ctlr:24;
+		uint8_t ctlr_index;
 		uint32_t pin;
 	} intx_id;
 };

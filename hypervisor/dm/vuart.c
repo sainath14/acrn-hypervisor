@@ -176,7 +176,7 @@ void vuart_toggle_intr(const struct acrn_vuart *vu)
 	uint32_t operation;
 
 	intr_reason = vuart_intr_reason(vu);
-	vioapic_get_rte(vu->vm, vu->irq, &rte);
+	vioapic_get_rte(vu->vm, VIOAPIC_CTLR_ZERO, vu->irq, &rte);
 
 	/* TODO:
 	 * Here should assert vuart irq according to vCOM1_IRQ polarity.
@@ -193,7 +193,7 @@ void vuart_toggle_intr(const struct acrn_vuart *vu)
 	}
 
 	vpic_set_irqline(vm_pic(vu->vm), vu->irq, operation);
-	vioapic_set_irqline_lock(vu->vm, vu->irq, operation);
+	vioapic_set_irqline_lock(vu->vm, VIOAPIC_CTLR_ZERO, vu->irq, operation);
 }
 
 static bool send_to_target(struct acrn_vuart *vu, uint8_t value_u8)

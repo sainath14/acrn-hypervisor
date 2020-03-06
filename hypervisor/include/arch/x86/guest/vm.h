@@ -94,6 +94,9 @@ enum vm_vlapic_state {
 	VM_VLAPIC_TRANSITION
 };
 
+#define VIOAPIC_CTLR_ZERO	0U
+#define VPIC_CTLR_ZERO		0U
+
 struct vm_arch {
 	/* I/O bitmaps A and B for this VM, MUST be 4-Kbyte aligned */
 	uint8_t io_bitmap[PAGE_SIZE*2];
