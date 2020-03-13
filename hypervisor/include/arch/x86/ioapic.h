@@ -21,10 +21,12 @@ struct ioapic_info {
 
 void ioapic_setup_irqs(void);
 
-bool ioapic_irq_is_gsi(uint32_t irq);
-uint32_t ioapic_irq_to_pin(uint32_t irq);
+bool is_irq_mapped_to_gsi(uint32_t irq);
+uint32_t gsi_to_ioapic_pin(uint32_t gsi);
 int32_t init_ioapic_id_info(void);
 uint8_t ioapic_irq_to_ioapic_id(uint32_t irq);
+
+uint16_t get_platform_ioapic_info (struct ioapic_info **plat_ioapic_info);
 
 /**
  * @defgroup ioapic_ext_apis IOAPIC External Interfaces
@@ -35,14 +37,13 @@ uint8_t ioapic_irq_to_ioapic_id(uint32_t irq);
  */
 
 /**
- * @brief Get irq num from pin num
+ * @brief Get irq num from gsi num
  *
- * @param[in]	pin The pin number
+ * @param[in]	gsi The gsi number
  *
  * @return irq number
  */
-uint32_t ioapic_pin_to_irq(uint32_t pin);
-
+uint32_t ioapic_gsi_to_irq(uint32_t gsi);
 /**
  * @brief Set the redirection table entry
  *
@@ -89,15 +90,27 @@ void ioapic_gsi_unmask_irq(uint32_t irq);
 
 void ioapic_get_rte_entry(void *ioapic_base, uint32_t pin, union ioapic_rte *rte);
 
+/*
+ * is_available is by default false when all the
+ * static variables, part of .bss, are initialized to 0s
+ * It is set to true, if the corresponding
+ * gsi falls in ranges identified by IOAPIC data
+ * in ACPI MADT in ioapic_setup_irqs.
+ */
+
 struct gsi_table {
-	uint8_t ioapic_id;
-	uint32_t pin;
-	void  *addr;
+	bool is_valid;
+	struct {
+		uint8_t acpi_id;
+		uint8_t index;
+		uint32_t pin;
+		void  *base_addr;
+	} ioapic_info;
 };
 
 void *gsi_to_ioapic_base(uint32_t gsi);
+uint8_t get_gsi_to_ioapic_index(uint32_t gsi);
 uint32_t ioapic_get_nr_gsi(void);
 uint32_t get_pic_pin_from_ioapic_pin(uint32_t pin_index);
-bool ioapic_is_pin_valid(uint32_t pin);
-
+bool is_gsi_valid(uint32_t gsi);
 #endif /* IOAPIC_H */

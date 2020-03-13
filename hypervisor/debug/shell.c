@@ -26,6 +26,8 @@
 #define MAX_STR_SIZE		256U
 #define SHELL_PROMPT_STR	"ACRN:\\>"
 
+#define INVALID_IOAPIC_ID	0xFF
+
 #define SHELL_LOG_BUF_SIZE		(PAGE_SIZE * MAX_PCPU_NUM / 2U)
 static char shell_log_buf[SHELL_LOG_BUF_SIZE];
 
@@ -1054,7 +1056,7 @@ static int32_t shell_show_cpu_int(__unused int32_t argc, __unused char **argv)
 
 static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 		uint32_t *irq, uint32_t *vector, uint64_t *dest, bool *lvl_tm,
-		uint32_t *pin, uint32_t *vpin, uint32_t *bdf, uint32_t *vbdf)
+		uint32_t *pgsi, uint32_t *vgsi, uint32_t *bdf, uint32_t *vbdf)
 {
 	if (is_entry_active(entry)) {
 		if (entry->intr_type == PTDEV_INTR_MSI) {
@@ -1065,8 +1067,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 			} else {
 				*lvl_tm = false;
 			}
-			*pin = INVALID_INTERRUPT_PIN;
-			*vpin = INVALID_INTERRUPT_PIN;
+			*pgsi = INVALID_INTERRUPT_PIN;
+			*vgsi = INVALID_INTERRUPT_PIN;
 			*bdf = entry->phys_sid.msi_id.bdf;
 			*vbdf = entry->virt_sid.msi_id.bdf;
 		} else {
@@ -1085,8 +1087,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 			} else {
 				*lvl_tm = false;
 			}
-			*pin = entry->phys_sid.intx_id.pin;
-			*vpin = entry->virt_sid.intx_id.pin;
+			*pgsi = entry->phys_sid.intx_id.gsi;
+			*vgsi = entry->virt_sid.intx_id.gsi;
 			*bdf = 0U;
 			*vbdf = 0U;
 		}
@@ -1098,8 +1100,8 @@ static void get_entry_info(const struct ptirq_remapping_info *entry, char *type,
 		*vector = 0U;
 		*dest = 0UL;
 		*lvl_tm = 0;
-		*pin = -1;
-		*vpin = -1;
+		*pgsi = ~0U;
+		*vgsi = ~0U;
 		*bdf = 0U;
 		*vbdf = 0U;
 	}
@@ -1115,10 +1117,10 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 	char type[16];
 	uint64_t dest;
 	bool lvl_tm;
-	uint32_t pin, vpin;
+	uint32_t pgsi, vgsi;
 	union pci_bdf bdf, vbdf;
 
-	len = snprintf(str, size, "\r\nVM\tTYPE\tIRQ\tVEC\tDEST\tTM\tPIN\tVPIN\tBDF\tVBDF");
+	len = snprintf(str, size, "\r\nVM\tTYPE\tIRQ\tVEC\tDEST\tTM\tGSI\tVGSI\tBDF\tVBDF");
 	if (len >= size) {
 		goto overflow;
 	}
@@ -1128,7 +1130,7 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 	for (idx = 0U; idx < CONFIG_MAX_PT_IRQ_ENTRIES; idx++) {
 		entry = &ptirq_entries[idx];
 		if (is_entry_active(entry)) {
-			get_entry_info(entry, type, &irq, &vector, &dest, &lvl_tm, &pin, &vpin,
+			get_entry_info(entry, type, &irq, &vector, &dest, &lvl_tm, &pgsi, &vgsi,
 					(uint32_t *)&bdf, (uint32_t *)&vbdf);
 			len = snprintf(str, size, "\r\n%d\t%s\t%d\t0x%X\t0x%X",
 					entry->vm->vm_id, type, irq, vector, dest);
@@ -1138,9 +1140,9 @@ static void get_ptdev_info(char *str_arg, size_t str_max)
 			size -= len;
 			str += len;
 
-			len = snprintf(str, size, "\t%s\t%hhu\t%hhu\t%x:%x.%x\t%x:%x.%x",
+			len = snprintf(str, size, "\t%s\t%hhu\t%hhu\t%hhu\t%x:%x.%x\t%x:%x.%x",
 					is_entry_active(entry) ? (lvl_tm ? "level" : "edge") : "none",
-					pin, vpin, bdf.bits.b, bdf.bits.d, bdf.bits.f,
+					pgsi, vgsi, bdf.bits.b, bdf.bits.d, bdf.bits.f,
 					vbdf.bits.b, vbdf.bits.d, vbdf.bits.f);
 			if (len >= size) {
 				goto overflow;
@@ -1173,7 +1175,7 @@ static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
 	uint32_t delmode, vector, dest;
 	bool level, phys, remote_irr, mask;
 	struct acrn_vm *vm = get_vm_from_vmid(vmid);
-	uint32_t pin, pincount;
+	uint32_t gsi, gsi_count;
 
 	if (is_poweroff_vm(vm)) {
 		len = snprintf(str, size, "\r\nvm is not exist for vmid %hu", vmid);
@@ -1192,10 +1194,13 @@ static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
 	size -= len;
 	str += len;
 
-	pincount = vioapic_pincount(vm);
+	gsi_count = vioapic_gsicount(vm);
 	rte.full = 0UL;
-	for (pin = 0U; pin < pincount; pin++) {
-		vioapic_get_rte(vm, pin, &rte);
+	for (gsi = 0U; gsi < gsi_count; gsi++) {
+		if (is_sos_vm(vm) && !is_gsi_valid(gsi)) {
+			continue;
+		}
+		vioapic_get_rte(vm, gsi, &rte);
 		mask = (rte.bits.intr_mask == IOAPIC_RTE_MASK_SET);
 		remote_irr = (rte.bits.remote_irr == IOAPIC_RTE_REM_IRR);
 		phys = (rte.bits.dest_mode == IOAPIC_RTE_DESTMODE_PHY);
@@ -1205,7 +1210,7 @@ static void get_vioapic_info(char *str_arg, size_t str_max, uint16_t vmid)
 		dest = rte.bits.dest_field;
 
 		len = snprintf(str, size, "\r\n%hhu\t0x%X\t%s\t0x%X\t%s\t%u\t%d\t%d",
-				pin, vector, phys ? "phys" : "logic", dest, level ? "level" : "edge",
+				gsi, vector, phys ? "phys" : "logic", dest, level ? "level" : "edge",
 				delmode >> 8U, remote_irr, mask);
 		if (len >= size) {
 			goto overflow;
@@ -1253,7 +1258,7 @@ static int32_t shell_show_vioapic_info(int32_t argc, char **argv)
 static int32_t get_ioapic_info(char *str_arg, size_t str_max_len)
 {
 	char *str = str_arg;
-	uint32_t irq;
+	uint32_t gsi;
 	size_t len, size = str_max_len;
 	uint32_t ioapic_nr_gsi = 0U;
 
@@ -1265,19 +1270,20 @@ static int32_t get_ioapic_info(char *str_arg, size_t str_max_len)
 	str += len;
 
 	ioapic_nr_gsi = ioapic_get_nr_gsi ();
-	for (irq = 0U; irq < ioapic_nr_gsi; irq++) {
-		void *addr = gsi_to_ioapic_base(irq);
-		uint32_t pin = ioapic_irq_to_pin(irq);
+	for (gsi = 0U; gsi < ioapic_nr_gsi; gsi++) {
+		void *addr = gsi_to_ioapic_base(gsi);
+		uint32_t pin;
 		union ioapic_rte rte;
 
-		/* Add NULL check for addr, INVALID_PIN check for pin */
-		if ((addr == NULL) || (!ioapic_is_pin_valid(pin))) {
-			goto overflow;
+		if (!is_gsi_valid(gsi)) {
+			continue;
 		}
+		addr = gsi_to_ioapic_base(gsi);
+		pin = gsi_to_ioapic_pin(gsi);
 
 		ioapic_get_rte_entry(addr, pin, &rte);
 
-		len = snprintf(str, size, "\r\n%03d\t%03hhu\t0x%08X\t0x%08X\t", irq, pin, rte.u.hi_32, rte.u.lo_32);
+		len = snprintf(str, size, "\r\n%03d\t%03hhu\t0x%08X\t0x%08X\t", gsi, pin, rte.u.hi_32, rte.u.lo_32);
 		if (len >= size) {
 			goto overflow;
 		}

@@ -32,6 +32,7 @@
 #include <assign.h>
 #include <spinlock.h>
 #include <logmsg.h>
+#include <ioapic.h>
 
 #define DBG_LEVEL_PIC	6U
 
@@ -311,6 +312,48 @@ static int32_t vpic_icw4(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 	return ret;
 }
 
+static uint32_t remap_pic_pin_or_gsi(const struct acrn_vm *vm, uint8_t pin_or_gsi, bool pic_pin_to_gsi)
+{
+	uint32_t remapped_pin_or_gsi = pin_or_gsi;
+
+	/*
+	 * Depending on the type of VM and the direction of remapping
+	 * check if remapping is needed.
+	 */
+
+	if(is_sos_vm(vm)) {
+		/*
+		 * For SOS VM vPIC pin to GSI is same as the one
+		 * that is used for platform
+		 */
+		remapped_pin_or_gsi = get_pic_pin_from_ioapic_pin(pin_or_gsi);
+	} else if (is_postlaunched_vm(vm)) {
+		/*
+		 * Devicemodel provides Interrupt Source Override Structure
+		 * via ACPI to Post-Launched VM.
+		 * 
+		 * 1) Interrupt source connected to vPIC pin 0 is connected to vIOAPIC pin 2
+		 * 2) Devicemodel does not request to hold ptirq entry with vPIC as interrupt
+		 *    control. So irrespective of the vgsi provided to ptirq_intx_pin_remap or
+		 *    ptirq_intx_ack, ptirq entry lookup is in vain
+		 */
+		if (pic_pin_to_gsi && (pin_or_gsi == 0U)) {
+			remapped_pin_or_gsi = 2U;
+		} else if (!pic_pin_to_gsi && (pin_or_gsi == 2U)){
+			remapped_pin_or_gsi = 0U;
+		} else {
+			/* No remapping needed */
+		}
+	} else {
+		/*
+		 * For Pre-launched VMs, Interrupt Source Override Structure
+		 * and IO-APIC Structure are not built.
+		 * No remapping needed.
+		 */
+	}
+	return remapped_pin_or_gsi;
+}
+
 static int32_t vpic_ocw1(const struct acrn_vpic *vpic, struct i8259_reg_state *i8259, uint8_t val)
 {
 	uint32_t pin, i, bit;
@@ -331,6 +374,7 @@ static int32_t vpic_ocw1(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 		 */
 		if (((i8259->mask & bit) == 0U) && ((old & bit) != 0U)) {
 			uint32_t virt_pin;
+			uint32_t vgsi;
 
 			/* master i8259 pin2 connect with slave i8259,
 			 * not device, so not need pt remap
@@ -342,7 +386,9 @@ static int32_t vpic_ocw1(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 
 			virt_pin = (master_pic(vpic, i8259)) ?
 					pin : (pin + 8U);
-			(void)ptirq_intx_pin_remap(vpic->vm, virt_pin, INTX_CTLR_PIC);
+
+			vgsi = remap_pic_pin_or_gsi(vpic->vm, virt_pin, true);
+			(void)ptirq_intx_pin_remap(vpic->vm, vgsi, INTX_CTLR_PIC);
 		}
 		pin = (pin + 1U) & 0x7U;
 	}
@@ -359,6 +405,7 @@ static int32_t vpic_ocw2(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 
 	if ((val & OCW2_EOI) != 0U) {
 		uint32_t isr_bit;
+		uint32_t vgsi;
 
 		if ((val & OCW2_SL) != 0U) {
 			/* specific EOI */
@@ -378,8 +425,8 @@ static int32_t vpic_ocw2(const struct acrn_vpic *vpic, struct i8259_reg_state *i
 
 		/* if level ack PTDEV */
 		if ((i8259->elc & (1U << (isr_bit & 0x7U))) != 0U) {
-			ptirq_intx_ack(vpic->vm, (master_pic(vpic, i8259) ? isr_bit : isr_bit + 8U),
-					INTX_CTLR_PIC);
+			vgsi = remap_pic_pin_or_gsi(vpic->vm, (master_pic(vpic, i8259) ? isr_bit : isr_bit + 8U), true);
+			ptirq_intx_ack(vpic->vm, vgsi, INTX_CTLR_PIC);
 		}
 	} else if (((val & OCW2_SL) != 0U) && i8259->rotate) {
 		/* specific priority */
@@ -461,15 +508,15 @@ static void vpic_set_pinstate(struct acrn_vpic *vpic, uint32_t pin, uint8_t leve
  *
  * @return None
  */
-void vpic_set_irqline(struct acrn_vpic *vpic, uint32_t irqline, uint32_t operation)
+void vpic_set_irqline(struct acrn_vpic *vpic, uint32_t gsi, uint32_t operation)
 {
 	struct i8259_reg_state *i8259;
-	uint32_t pin;
+	uint32_t pin = remap_pic_pin_or_gsi(vpic->vm, gsi, false);
 	uint64_t rflags;
 
-	if (irqline < NR_VPIC_PINS_TOTAL) {
-		i8259 = &vpic->i8259[irqline >> 3U];
-		pin = irqline;
+
+	if (pin < NR_VPIC_PINS_TOTAL) {
+		i8259 = &vpic->i8259[pin >> 3U];
 
 		if (i8259->ready) {
 			spinlock_irqsave_obtain(&(vpic->lock), &rflags);
@@ -511,9 +558,11 @@ vpic_pincount(void)
  * @pre irqline < NR_VPIC_PINS_TOTAL
  * @pre this function should be called after vpic_init()
  */
-void vpic_get_irqline_trigger_mode(const struct acrn_vpic *vpic, uint32_t irqline,
+void vpic_get_irqline_trigger_mode(const struct acrn_vpic *vpic, uint32_t gsi,
 		enum vpic_trigger *trigger)
 {
+	uint32_t irqline = remap_pic_pin_or_gsi(vpic->vm, gsi, false);
+	
 	if ((vpic->i8259[irqline >> 3U].elc & (1U << (irqline & 0x7U))) != 0U) {
 		*trigger = LEVEL_TRIGGER;
 	} else {
