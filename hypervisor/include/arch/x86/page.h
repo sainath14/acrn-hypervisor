@@ -90,4 +90,7 @@ extern const struct memory_ops ppt_mem_ops;
 void init_ept_mem_ops(struct memory_ops *mem_ops, uint16_t vm_id);
 void *get_reserve_sworld_memory_base(void);
 
+#ifdef CONFIG_LAST_LEVEL_EPT_AT_BOOT
+void get_buffer_for_ept_pages(void);
+#endif
 #endif /* PAGE_H */
