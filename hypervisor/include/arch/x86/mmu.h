@@ -76,6 +76,16 @@ static inline uint64_t round_pde_down(uint64_t val)
 	return (val & PDE_MASK);
 }
 
+static inline uint64_t round_pdpte_up(uint64_t val)
+{
+	return (((val + (uint64_t)PDPTE_SIZE) - 1UL) & PDPTE_MASK);
+}
+
+static inline uint64_t round_pdpte_down(uint64_t val)
+{
+	return (val & PDPTE_MASK);
+}
+
 /**
  * @brief Page tables level in IA32 paging mode
  */
