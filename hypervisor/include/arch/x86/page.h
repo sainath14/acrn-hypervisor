@@ -89,5 +89,5 @@ struct memory_ops {
 extern const struct memory_ops ppt_mem_ops;
 void init_ept_mem_ops(struct memory_ops *mem_ops, uint16_t vm_id);
 void *get_reserve_sworld_memory_base(void);
-
+void setup_vm_pt_base(void *pt_base, uint16_t vm_id);
 #endif /* PAGE_H */

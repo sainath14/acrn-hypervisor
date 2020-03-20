@@ -210,6 +210,15 @@ static void prepare_prelaunched_vm_memmap(struct acrn_vm *vm, const struct acrn_
 	uint64_t remaining_hpa_size = vm_config->memory.size;
 	uint32_t i;
 
+#ifdef CONFIG_LAST_LEVEL_EPT_AT_BOOT
+	uint64_t ept_pt_base;
+	uint32_t size;
+	size = (PT_PAGE_NUM(PRE_VM_EPT_ADDRESS_SPACE(CONFIG_UOS_RAM_SIZE)))*4096U;
+	ept_pt_base = e820_alloc_memory(size, ~0UL);
+	pr_err ("Reserving memory from %lx to %lx for vm %d", ept_pt_base, (ept_pt_base+size), vm->vm_id);
+	hv_access_memory_region_update(ept_pt_base, size);
+	setup_vm_pt_base((void *)ept_pt_base, vm->vm_id);
+#endif
 	for (i = 0U; i < vm->e820_entry_num; i++) {
 		const struct e820_entry *entry = &(vm->e820_entries[i]);
 
@@ -277,6 +286,13 @@ static void prepare_sos_vm_memmap(struct acrn_vm *vm)
 		panic("Please configure SOS_VM_ADDRESS_SPACE correctly!\n");
 	}
 
+#ifdef CONFIG_LAST_LEVEL_EPT_AT_BOOT
+	uint64_t ept_pt_base;
+	uint32_t size = round_pde_up((PT_PAGE_NUM(EPT_ADDRESS_SPACE(CONFIG_SOS_RAM_SIZE)))*4096U);
+	ept_pt_base = e820_alloc_memory(size, ~0UL);
+	hv_access_memory_region_update(ept_pt_base, size);
+	setup_vm_pt_base((void *)ept_pt_base, vm->vm_id);
+#endif
 	/* create real ept map for all ranges with UC */
 	ept_add_mr(vm, pml4_page, p_mem_range_info->mem_bottom, p_mem_range_info->mem_bottom,
 			(p_mem_range_info->mem_top - p_mem_range_info->mem_bottom), attr_uc);
@@ -320,7 +336,7 @@ static void prepare_sos_vm_memmap(struct acrn_vm *vm)
 
 	/* unmap AP trampoline code for security
 	 * 'allocate_pages()' in depri boot mode or
-	 * 'e820_alloc_low_memory()' in direct boot
+	 * 'e820_alloc_memory()' in direct boot
 	 * mode will ensure the base address of tramploline
 	 * code be page-aligned.
 	 */
