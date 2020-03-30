@@ -124,7 +124,7 @@
 #define PDPTE_SIZE		(1UL << PDPTE_SHIFT)
 #define PDPTE_MASK		(~(PDPTE_SIZE - 1UL))
 
-#define PDE_SHIFT		21U
+#define PDE_SHIFT		21UL
 #define PTRS_PER_PDE		512UL
 #define PDE_SIZE		(1UL << PDE_SHIFT)
 #define PDE_MASK		(~(PDE_SIZE - 1UL))
