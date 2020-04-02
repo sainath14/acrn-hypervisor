@@ -272,6 +272,7 @@ static void init_bars(struct pci_vdev *vdev, bool is_sriov_bar)
 			vbar = &vdev->vbars[idx];
 			offset = pci_bar_offset(idx);
 		}
+		pci_vdev_write_vcfg(vdev, offset, 4U, 0U);
 		lo = pci_pdev_read_cfg(pbdf, offset, 4U);
 
 		type = pci_get_bar_type(lo);
@@ -307,6 +308,7 @@ static void init_bars(struct pci_vdev *vdev, bool is_sriov_bar)
 				} else {
 					offset = pci_bar_offset(idx);
 				}
+				pci_vdev_write_vcfg(vdev, offset, 4U, 0U);
 				pci_pdev_write_cfg(pbdf, offset, 4U, ~0U);
 				size32 = pci_pdev_read_cfg(pbdf, offset, 4U);
 				pci_pdev_write_cfg(pbdf, offset, 4U, hi);
